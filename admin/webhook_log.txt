@@ -1,0 +1,27 @@
+2025-11-21 18:34:10 - ⚠️ No se encontró registro local para pi_3SW3q6RxluGmmUIz07CwbD6Y
+2025-11-26 22:21:09 - ❌ Firma inválida
+2025-11-26 22:21:18 - ❌ Firma inválida
+2025-11-26 22:22:24 - ❌ Firma inválida
+2025-11-26 22:22:37 - ❌ Firma inválida
+2025-11-26 22:24:59 - ❌ Firma inválida
+2025-11-26 22:25:04 - ❌ Firma inválida
+2025-11-26 22:25:06 - ❌ Firma inválida
+2025-11-26 22:25:07 - ❌ Firma inválida
+2025-11-26 22:25:08 - ❌ Firma inválida
+2025-11-26 22:25:10 - ❌ Firma inválida
+2025-11-26 22:25:11 - ❌ Firma inválida
+2025-11-26 22:25:12 - ❌ Firma inválida
+2025-11-26 22:25:13 - ❌ Firma inválida
+2025-11-26 22:25:14 - ❌ Firma inválida
+2025-11-26 22:25:15 - ❌ Firma inválida
+2025-11-26 22:25:16 - ❌ Firma inválida
+2025-11-26 22:25:17 - ❌ Firma inválida
+2025-11-26 22:25:45 - ❌ Firma inválida
+2025-11-26 22:25:46 - ❌ Firma inválida
+2025-11-26 22:25:47 - ❌ Firma inválida
+2025-11-26 22:25:50 - ❌ Firma inválida
+2025-11-26 22:25:51 - ❌ Firma inválida
+2025-11-26 22:25:52 - ❌ Firma inválida
+2025-11-26 22:25:54 - ❌ Firma inválida
+2025-11-26 22:25:55 - ❌ Firma inválida
+2025-11-26 22:33:44 - ⚠️ No se encontró registro local para pi_3SXvxfRxluGmmUIz0GJGnhyo

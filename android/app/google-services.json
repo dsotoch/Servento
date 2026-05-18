@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "664953678876",
+    "project_id": "servirentasmx",
+    "storage_bucket": "servirentasmx.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664953678876:android:95202bfb8de94aff9383d9",
+        "android_client_info": {
+          "package_name": "com.techub.prestaservicios.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664953678876-fqqs679u78jp31faca25rdlg1mtj9403.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFEu6zISHKyQqcLxDH0GztCfwPKQtV7RU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664953678876-fqqs679u78jp31faca25rdlg1mtj9403.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "664953678876-pcbrds545ppn9ct17s3a0fqe7im97rgh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.techub.prestaservicios.prestaservicios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
