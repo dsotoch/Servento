@@ -91,7 +91,7 @@ class _OtpAutoReadWidgetState extends State<OtpAutoReadWidget> {
                   ),
                   onChanged: (value) {
                     setState(() => _otpCode = value);
-                    if (value.length == 6) {
+                    if (value.length == 4) {
                       widget.onCodeReceived(value);
                     }
                   },
@@ -129,7 +129,7 @@ class _OtpAutoReadWidgetState extends State<OtpAutoReadWidget> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                if (_otpCode.length == 6) ...[
+                if (_otpCode.length == 4) ...[
                  Center(child:  ElevatedButton(
                     onPressed: () => widget.onCodeReceived(_otpCode),
                     child: Text("Validar Codigo"),

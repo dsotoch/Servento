@@ -1,5 +1,63 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+require_once "env.php";
+require_once "vendor/autoload.php";
+function validarTelefonoAndEmail($telefono, $email)
+{
+    global $pdo;
+
+    $telefono = trim($telefono);
+    $email = trim($email);
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return [
+            "success" => false,
+            "mensaje" => "Correo inválido"
+        ];
+    }
+
+    if (!ctype_digit($telefono)) {
+        return [
+            "success" => false,
+            "mensaje" => "El teléfono solo debe contener números."
+        ];
+    }
+
+    if (strlen($telefono) != 9) {
+        return [
+            "success" => false,
+            "mensaje" => "El número de teléfono debe contener 9 dígitos."
+        ];
+    }
+
+    $stmt = $pdo->prepare("SELECT 1 FROM usuarios WHERE email = ?");
+    $stmt->execute([$email]);
+
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        return [
+            "success" => false,
+            "mensaje" => "El correo ya se encuentra registrado."
+        ];
+    }
+
+    $stmt = $pdo->prepare("SELECT 1 FROM usuarios WHERE telefono = ?");
+    $stmt->execute([$telefono]);
+
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        return [
+            "success" => false,
+            "mensaje" => "El teléfono ya está registrado."
+        ];
+    }
+
+    return [
+        "success" => true,
+        "mensaje" => "Correo y teléfono válidos."
+    ];
+}
+
 function registrarUsuario($user, $pass, $email, $telefono)
 {
     global $pdo;
@@ -182,5 +240,161 @@ function actualizarUsuario($id, $user, $pass = null, $email = null, $fotoBase64 
         $linea = $e->getLine();
 
         throw new Exception("Error en $archivo en la línea $linea: $mensaje");
+    }
+}
+
+function enviarActivacion($correo)
+{
+    global $pdo;
+    $token = bin2hex(random_bytes(32));
+
+    $enlace = $_ENV["DOMINIO"] . "/apirest.php/activarCuenta?token=$token";
+
+    $mail = new PHPMailer(true);
+
+    try {
+
+        $mail->isSMTP();
+
+        $mail->Host = $_ENV["MAIL_HOST"];
+
+        $mail->SMTPAuth = true;
+
+        $mail->Username = $_ENV["MAIL_USER"];
+
+        $mail->Password = $_ENV["MAIL_PASS"];
+
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+        $mail->Port = $_ENV["MAIL_PORT"];
+
+        // Remitente
+        $mail->setFrom(
+            $_ENV["MAIL_FROM"],
+            $_ENV["NOMBRE_APP"]
+        );
+
+        $mail->addAddress($correo);
+
+        $mail->isHTML(true);
+
+        $mail->Subject = 'Activar cuenta';
+
+        $mail->Body = "
+        <h2>Bienvenido</h2>
+
+        <p>Haz clic para activar tu cuenta en Servento:</p>
+
+        <a href='$enlace'
+           style='
+                background:#28a745;
+                color:white;
+                padding:12px 20px;
+                text-decoration:none;
+                border-radius:5px;
+           '>
+
+           Activar cuenta
+
+        </a>
+        <br>
+        ";
+
+        $mail->send();
+        $stmt = $pdo->prepare("UPDATE usuarios SET estado='pendiente', token=? WHERE email=?");
+        $stmt->execute([$token, $correo]);
+        return [
+            "success" => true,
+            "token" => $token
+        ];
+    } catch (Exception $e) {
+
+        return [
+            "success" => false,
+            "error" =>  $e->getMessage()
+        ];
+    }
+}
+
+function activarCuenta($token)
+{
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE usuarios SET estado=?,token=null WHERE token=?");
+    $stmt->execute(['validado', $token]);
+    return [
+        "Respuesta" => "Correo Verificado Correctamente"
+    ];
+}
+
+function enviarReset($correo)
+{
+    global $pdo;
+    $token = bin2hex(random_bytes(32));
+
+    $enlace = $_ENV["DOMINIO"] . "/cambiarPassword.php?token=$token";
+
+    $mail = new PHPMailer(true);
+
+    try {
+
+        $mail->isSMTP();
+
+        $mail->Host = $_ENV["MAIL_HOST"];
+
+        $mail->SMTPAuth = true;
+
+        $mail->Username = $_ENV["MAIL_USER"];
+
+        $mail->Password = $_ENV["MAIL_PASS"];
+
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+        $mail->Port = $_ENV["MAIL_PORT"];
+
+        // Remitente
+        $mail->setFrom(
+            $_ENV["MAIL_FROM"],
+            $_ENV["NOMBRE_APP"]
+        );
+
+        $mail->addAddress($correo);
+
+        $mail->isHTML(true);
+
+        $mail->Subject = 'Recuperar cuenta';
+
+        $mail->Body = "
+        <h2>Bienvenido</h2>
+
+        <p>Haz clic para cambiar tu contraseña en Servento:</p>
+
+        <a href='$enlace'
+           style='
+                background:#28a745;
+                color:white;
+                padding:12px 20px;
+                text-decoration:none;
+                border-radius:5px;
+           '>
+
+           Cambiar Contraseña
+
+        </a>
+        <br>
+        ";
+
+        $mail->send();
+        $stmt = $pdo->prepare("UPDATE usuarios SET token=? WHERE email=?");
+        $stmt->execute([$token, $correo]);
+        return [
+            "success" => true,
+            "token" => $token
+        ];
+    } catch (Exception $e) {
+
+        return [
+            "success" => false,
+            "error" => $e->getMessage()
+        ];
     }
 }

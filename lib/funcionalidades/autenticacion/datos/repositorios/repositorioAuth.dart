@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prestaservicios/compartido/conexion.dart';
@@ -15,12 +17,23 @@ class RepositorioAuth implements casoUsoAuth {
         "user": user,
         "pass": pass,
       });
+      
       return response;
     } catch (e) {
       return {'success': false, 'mensaje': e.toString()};
     }
   }
-
+  @override
+  Future<Map<String, dynamic>> resetPass(String email) async {
+    try {
+      final response = await ApiService().GET("apirest.php/send_email", {
+        "email": email
+      });
+      return response;
+    } catch (e) {
+      return {'success': false, 'mensaje': e.toString()};
+    }
+  }
   @override
   Future<Map<String, dynamic>> registrarse(
     String email,
@@ -103,23 +116,27 @@ class RepositorioAuth implements casoUsoAuth {
     try {
       final dio = Dio();
 
+      String basicAuth =
+          'Basic ${base64Encode(utf8.encode('${Env.VERIF_APP_KEY}:${Env.VERIF_APP_SECRET}'))}';
+
       final response = await dio.post(
-        "https://api.smsmasivos.com.mx/otp/resend",
+        "https://verification.api.sinch.com/verification/v1/verifications",
         data: {
-          "phone_number": telefono,
-          "country_code": "52",
-          "code_length": 6,
-          "code_type": "numeric",
-          "company": "Cuca la Curra",
+          "identity": {
+            "type": "number",
+            "endpoint": formatearTelefono(telefono),
+          },
+          "method": "sms",
         },
         options: Options(
           headers: {
-            "apikey": Env.ApiKeySMS,
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": basicAuth,
+            "Content-Type": "application/json",
           },
         ),
       );
-      print(response);
+
+      print(response.data);
       return response.data;
     } catch (e) {
       print(e);
@@ -127,33 +144,54 @@ class RepositorioAuth implements casoUsoAuth {
     }
   }
 
-  @override
-  Future<Map<String, dynamic>> enviarCodigo(String telefono) async {
-    try {
-      final dio = Dio();
+  String formatearTelefono(String telefono) {
+    telefono = telefono.trim(); // quita espacios
 
-      final response = await dio.post(
-        "https://api.smsmasivos.com.mx/otp/send",
-        data: {
-          "phone_number": telefono,
-          "country_code": "52",
-          "code_length": 6,
-          "code_type": "numeric",
-          "company": "Cuca la Curra",
-        },
-        options: Options(
-          headers: {
-            "apikey": Env.ApiKeySMS,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        ),
-      );
-      print(response);
-      return response.data;
+    // si ya viene con +
+    if (telefono.startsWith('+')) {
+      return telefono;
+    }
+
+    // si viene solo número peruano
+    return '+51$telefono';
+  }
+
+  @override
+  Future<Map<String, dynamic>> validarEmailAndTelefono(
+    String email,
+    String telefono,
+  )async {
+     try {
+      final response = await ApiService().GET("apirest.php/usuario", {
+        "email": email,
+        "telefono": telefono,
+      });
+      final data = response as Map<String, dynamic>;
+      if (data["success"] == false) {
+        throw new Exception(data["mensaje"]);
+      }
+      return response;
     } catch (e) {
-      print(e);
       return {'success': false, 'mensaje': e.toString()};
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> enviarCodigo(String email) async {
+     try {
+      final response = await ApiService().POST("apirest.php/send_email", {
+        "email": email,
+      });
+      final data = response as Map<String, dynamic>;
+      if (data["success"] == false) {
+        throw new Exception(data["mensaje"]);
+      }
+      return response;
+    } catch (e) {
+      return {'success': false, 'mensaje': e.toString()};
+    }
+
+     
   }
 
   @override
@@ -164,17 +202,25 @@ class RepositorioAuth implements casoUsoAuth {
     try {
       final dio = Dio();
 
-      final response = await dio.post(
-        "https://api.smsmasivos.com.mx/otp/verify",
-        data: {"phone_number": telefono, "verification_code": codigo},
+      String basicAuth =
+          'Basic ${base64Encode(utf8.encode('${Env.VERIF_APP_KEY}:${Env.VERIF_APP_SECRET}'))}';
+
+      final response = await dio.put(
+        "https://verification.api.sinch.com/verification/v1/verifications/number/" +
+            formatearTelefono(telefono),
+        data: {
+          "method": "sms",
+          "sms": {"code": codigo},
+        },
         options: Options(
           headers: {
-            "apikey": Env.ApiKeySMS,
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": basicAuth,
+            "Content-Type": "application/json",
           },
         ),
       );
-      print(response);
+
+      print(response.data);
       return response.data;
     } catch (e) {
       print(e);

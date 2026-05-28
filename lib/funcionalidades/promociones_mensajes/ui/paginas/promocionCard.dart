@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:prestaservicios/compartido/colores.dart';
 import 'package:prestaservicios/compartido/funciones.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/modelos/modeloPromociones.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/repositorios/repositorioPromociones.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/ui/controladores/controladorPromocion.dart';
+import 'package:prestaservicios/funcionalidades/promociones_mensajes/ui/paginas/pagosPrincipal.dart';
 
 class PromocionCard extends StatefulWidget {
   final Promocion promocion;
-   final String usuario;
-  const PromocionCard({Key? key, required this.promocion,required this.usuario}) : super(key: key);
+  final String usuario;
+  
+  const PromocionCard({
+    Key? key,
+    required this.promocion,
+    required this.usuario,
+  }) : super(key: key);
 
   @override
   _PromocionCardState createState() => _PromocionCardState();
@@ -37,9 +44,9 @@ class _PromocionCardState extends State<PromocionCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-  decoration: BoxDecoration(
-    gradient: LinearGradient(colors: [Colors.black87,Colors.purple])
-  ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [Colors.black87, Colors.purple]),
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -56,13 +63,15 @@ class _PromocionCardState extends State<PromocionCard> {
                   procesando = true;
                 });
                 final rs = await controladorPromocion.asignarPromocion(
-                  widget.promocion.id.toString(),widget.usuario
+                  widget.promocion.id.toString(),
+                  widget.usuario,
                 );
                 setState(() {
                   procesando = false;
                 });
                 if (rs["success"] == true) {
-                  Funciones().mostrarMensaje("ok", rs["mensaje"]);
+                 await Funciones().mostrarMensaje("ok", rs["mensaje"]);
+                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MovimientosPagosScreen(usuario: widget.usuario),));
                 } else {
                   Funciones().mostrarMensaje("error", rs["mensaje"]);
                 }
@@ -70,7 +79,7 @@ class _PromocionCardState extends State<PromocionCard> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: procesando
-              ? Text("Procesando...")
+              ? Text("Procesando...",style: TextStyle(color: Colors.white),)
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -120,12 +129,9 @@ class _PromocionCardState extends State<PromocionCard> {
                     // 🔹 Descripción
                     if (widget.promocion.descripcion != null)
                       Text(
-                        widget.promocion.descripcion!,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                        maxLines: 2,
+                        widget.promocion.descripcion??'',
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                        maxLines: 50,
                         overflow: TextOverflow.ellipsis,
                       ),
                     const SizedBox(height: 12),
@@ -142,7 +148,7 @@ class _PromocionCardState extends State<PromocionCard> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Costo Mensual: ${widget.promocion.descuento ?? 0}',
+                              'Costo:  S/ ${widget.promocion.descuento ?? 0}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -161,19 +167,27 @@ class _PromocionCardState extends State<PromocionCard> {
                         if (widget.promocion.tipo != null)
                           Chip(
                             label: Text(
-                              "Promocion dirigida para: ${widget.promocion.tipo!.toUpperCase()}",
+                              "Exclusiva para: ${widget.promocion.tipo!.toUpperCase()}",
                               style: const TextStyle(fontSize: 12),
                             ),
                             backgroundColor: Colors.blue.shade50,
                           ),
-                        if (widget.promocion.categoria != null)
+                        if (widget.promocion.categoria!=null  && widget.promocion.categoria != '' )
                           Chip(
                             label: Text(
-                              widget.promocion.categoria!,
+                              widget.promocion.categoria??'',
                               style: const TextStyle(fontSize: 12),
                             ),
                             backgroundColor: Colors.purple.shade50,
                           ),
+
+                        Chip(
+                          label: Text(
+                            "Vigencia ${widget.promocion.diasVigencia??0} dias",
+                            style: const TextStyle(fontSize: 12,color: Colors.white),
+                          ),
+                          backgroundColor: Colores.color_primario,
+                        ),
                       ],
                     ),
                   ],

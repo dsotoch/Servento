@@ -50,7 +50,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   int _page = 0;
-  final int _limit = 100;
+  int _limit = 100;
   bool _isLoading = false;
   bool _hasMore = true;
   late List<Map<String, dynamic>> misfavoritos;
@@ -185,8 +185,6 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     final baseList = _servicios;
 
-   
-
     final filtered = baseList.where((s) {
       final titulo = s.titulo.toLowerCase();
       final descripcion = s.descripcion.toLowerCase();
@@ -205,11 +203,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
       final result = matchesQuery && matchesCategory && matchesSubcategory;
 
-    
-
       return result;
     }).toList();
-
 
     filtered.sort((a, b) {
       final aFav = _favorites.contains(a.id.toString()) ? 1 : 0;
@@ -273,389 +268,431 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     });
 
     final services = _filteredServices;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Material(
-                  elevation: 0,
-                  borderRadius: BorderRadius.circular(8),
-                  child: TextField(
-                    onChanged: (v) => setState(() => _query = v),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText:
-                          'Buscar servicios, ej.: plomero, clases, diseño...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0,
-                        horizontal: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () async {
-                  final res = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FiltroDistanciaScreen(
-                        radio: _radioKm,
-                        locationData: widget.locationData,
-                      ),
-                    ),
-                  );
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {
+          _page = 0;
+          _hasMore = true;
+          _isLoading = false;
+          _servicios = [];
+          _favorites.clear();
+        });
 
-                  if (res != null) {
-                    setState(() {
-                      _radioKm = res["radio"];
+        final response = await controladorServicio.listarServiciosGeneral(
+          "0",
+          _limit.toString(),
+          widget.locationData.latitude.toString(),
+          widget.locationData.longitude.toString(),
+          _radioKm.toString(),
+        );
 
-                      final lista = res["lista"];
-                      if (lista != null && lista is List<Modeloserviciovista>) {
-                        _servicios = lista; // ✅ AQUÍ EL CAMBIO IMPORTANTE
-                      } else {
-                        print("❌ lista inválida desde filtro: $lista");
-                        _servicios = [];
-                      }
-                      _page = 1;
-                      _hasMore = true;
-                    });
-                  }
-                },
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.purple,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.gps_fixed,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      Text(
-                        "${_radioKm.round()} km",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
+        final data = response["mensaje"] as List;
+        final nuevos = data
+            .map((e) => Modeloserviciovista.fromJson(e))
+            .toList();
+        await _misFavoritos();
+
+        setState(() {
+          _servicios = nuevos;
+          _page = 0;
+          _hasMore = nuevos.length >= _limit;
+        });
+      },
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 8.0,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Material(
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(8),
+                    child: TextField(
+                      onChanged: (v) => setState(() => _query = v),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search),
+                        hintText:
+                            'Buscar servicios, ej.: plomero, clases, diseño...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 56,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            itemCount: _categories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final cat = _categories;
-              final selected = cat[index] == _selectedCategory;
-              return ChoiceChip(
-                label: Text(cat[index]),
-                selected: selected,
-                onSelected: (_) {
-                  setState(() => _selectedCategory = cat[index]);
-                  _loadMore();
-                },
-              );
-            },
-          ),
-        ),
-        SizedBox(
-          height: 56,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            itemCount: _subcategories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final sub = _subcategories[index];
-
-              final selected = sub == _selectedSubcategory;
-
-              return ChoiceChip(
-                label: Text(sub),
-                selected: selected,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedSubcategory = sub;
-                  });
-                  _loadMore();
-                },
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Row(
-            children: [
-              Text(
-                '${services.length} resultados',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const Spacer(),
-              DropdownButton<String>(
-                value: _sortBy,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Relevancia',
-                    child: Text('Relevancia'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Mejor valorados',
-                    child: Text('Mejor valorados'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Precio: menor',
-                    child: Text('Precio: menor'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Precio: mayor',
-                    child: Text('Precio: mayor'),
-                  ),
-                ],
-                onChanged: (v) => setState(() => _sortBy = v ?? 'Relevancia'),
-              ),
-            ],
-          ),
-        ),
-
-        Expanded(
-          child: services.isEmpty
-              ? Center(child: Text('No se encontraron servicios '))
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxis = constraints.maxWidth > 900
-                        ? 3
-                        : (constraints.maxWidth > 600 ? 2 : 1);
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        setState(() {
-                          _page = 0;
-                          _hasMore = true;
-                          _isLoading = false;
-                          _servicios = [];
-                          _favorites.clear();
-                        });
-
-                        final response = await controladorServicio
-                            .listarServiciosGeneral(
-                              (_page * _limit).toString(),
-                              _limit.toString(),
-                              widget.locationData.latitude.toString(),
-                              widget.locationData.longitude.toString(),
-                              _radioKm.toString(),
-                            );
-
-                        final data = response["mensaje"] as List;
-                        final nuevos = data
-                            .map((e) => Modeloserviciovista.fromJson(e))
-                            .toList();
-                        await _misFavoritos();
-
-                        setState(() {
-                          _servicios = nuevos;
-                          _page = 0;
-                          _hasMore = nuevos.length >= _limit;
-                        });
-                      },
-                      child: GridView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0,
                           horizontal: 12,
-                          vertical: 8,
                         ),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxis,
-                          childAspectRatio: 3 / 3,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FiltroDistanciaScreen(
+                          radio: _radioKm,
+                          locationData: widget.locationData,
                         ),
-                        itemCount: services.length + (_hasMore ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == services.length) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.greenAccent,
+                      ),
+                    );
+
+                    if (res != null) {
+                      setState(() {
+                        _radioKm = res["radio"];
+
+                        final lista = res["lista"];
+                        if (lista != null &&
+                            lista is List<Modeloserviciovista>) {
+                          _servicios = lista; // ✅ AQUÍ EL CAMBIO IMPORTANTE
+                        } else {
+                          print("❌ lista inválida desde filtro: $lista");
+                          _servicios = [];
+                        }
+                        _page = 1;
+                        _hasMore = true;
+                      });
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.purple,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.gps_fixed,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          "${_radioKm.round()} km",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              itemCount: _categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final cat = _categories;
+                final selected = cat[index] == _selectedCategory;
+                return ChoiceChip(
+                  label: Text(cat[index]),
+                  selected: selected,
+                  onSelected: (_) {
+                    setState(() => _selectedCategory = cat[index]);
+                    _loadMore();
+                  },
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              itemCount: _subcategories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final sub = _subcategories[index];
+
+                final selected = sub == _selectedSubcategory;
+
+                return ChoiceChip(
+                  label: Text(sub),
+                  selected: selected,
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedSubcategory = sub;
+                    });
+                    _loadMore();
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Row(
+              children: [
+                Text(
+                  '${services.length} resultados',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const Spacer(),
+                DropdownButton<String>(
+                  value: _sortBy,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Relevancia',
+                      child: Text('Relevancia'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Mejor valorados',
+                      child: Text('Mejor valorados'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Precio: menor',
+                      child: Text('Precio: menor'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Precio: mayor',
+                      child: Text('Precio: mayor'),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _sortBy = v ?? 'Relevancia'),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: services.isEmpty
+                ? Center(child: Text('No se encontraron servicios '))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxis = constraints.maxWidth > 900
+                          ? 3
+                          : (constraints.maxWidth > 600 ? 2 : 1);
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          setState(() {
+                            _page = 0;
+                            _hasMore = true;
+                            _isLoading = false;
+                            _servicios = [];
+                            _favorites.clear();
+                          });
+
+                          final response = await controladorServicio
+                              .listarServiciosGeneral(
+                                (_page * _limit).toString(),
+                                _limit.toString(),
+                                widget.locationData.latitude.toString(),
+                                widget.locationData.longitude.toString(),
+                                _radioKm.toString(),
+                              );
+
+                          final data = response["mensaje"] as List;
+                          final nuevos = data
+                              .map((e) => Modeloserviciovista.fromJson(e))
+                              .toList();
+                          await _misFavoritos();
+
+                          setState(() {
+                            _servicios = nuevos;
+                            _page = 0;
+                            _hasMore = nuevos.length >= _limit;
+                          });
+                        },
+                        child: GridView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxis,
+                                childAspectRatio: 3 / 3,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
                               ),
-                            );
-                          }
-                          if (index < services.length) {
-                            final s = services[index];
-
-                            final isFav = _favorites.contains(s.id.toString());
-
-                            return GestureDetector(
-                              onTap: () async {
-                                await _obtenerPromocion(s.usuarioId.toString());
-                                _showServiceDetail(context, s);
-                              },
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          itemCount: services.length + (_hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == services.length) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.greenAccent,
                                 ),
-                                elevation: 2,
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 6,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.vertical(
-                                              top: Radius.circular(12),
-                                            ),
-                                        child: Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            CachedNetworkImage(
-                                              imageUrl:
-                                                  "${Env.dominio}/${s.imagen1 ?? 'sin_imagen.png'}",
-                                              placeholder: (context, url) =>
-                                                  const Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          color: Colors.black,
+                              );
+                            }
+                            if (index < services.length) {
+                              final s = services[index];
+
+                              final isFav = _favorites.contains(
+                                s.id.toString(),
+                              );
+
+                              return GestureDetector(
+                                onTap: () async {
+                                  await _obtenerPromocion(
+                                    s.usuarioId.toString(),
+                                  );
+                                  _showServiceDetail(context, s);
+                                },
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 2,
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        flex: 6,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(12),
+                                              ),
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl:
+                                                    "${Env.dominio}/${s.imagen1 ?? 'sin_imagen.png'}",
+                                                placeholder: (context, url) =>
+                                                    const Center(
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            color: Colors.black,
+                                                          ),
+                                                    ),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        const Icon(
+                                                          Icons.broken_image,
                                                         ),
+                                                fit: BoxFit.cover,
+                                              ),
+                                              Positioned(
+                                                right: 8,
+                                                top: 8,
+                                                child: InkWell(
+                                                  onTap: () => _toggleFavorite(
+                                                    s.id.toString(),
                                                   ),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      const Icon(
-                                                        Icons.broken_image,
-                                                      ),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            Positioned(
-                                              right: 8,
-                                              top: 8,
-                                              child: InkWell(
-                                                onTap: () => _toggleFavorite(
-                                                  s.id.toString(),
-                                                ),
-                                                child: CircleAvatar(
-                                                  backgroundColor:
-                                                      Colors.white70,
-                                                  child: Icon(
-                                                    isFav
-                                                        ? Icons.favorite
-                                                        : Icons.favorite_border,
-                                                    color: isFav
-                                                        ? Colors.red
-                                                        : Colors.black,
+                                                  child: CircleAvatar(
+                                                    backgroundColor:
+                                                        Colors.white70,
+                                                    child: Icon(
+                                                      isFav
+                                                          ? Icons.favorite
+                                                          : Icons
+                                                                .favorite_border,
+                                                      color: isFav
+                                                          ? Colors.red
+                                                          : Colors.black,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      flex: 5,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    s.titulo.toUpperCase(),
+                                      Expanded(
+                                        flex: 5,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      s.titulo.toUpperCase(),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    '💰 ${s.precio.toStringAsFixed(0)}',
                                                     style: const TextStyle(
                                                       fontWeight:
-                                                          FontWeight.w600,
+                                                          FontWeight.bold,
                                                     ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
                                                   ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  '💰 ${s.precio.toStringAsFixed(0)}',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
+                                                ],
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                s.descripcion,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const Spacer(),
+                                              Text(
+                                                '🗂️ ${s.categoria}',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const Spacer(),
+                                              Text(
+                                                '➤ ${s.subcategoria.toLowerCase()}',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.star, size: 14),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    s.promedioEstrellas
+                                                        .toString(),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              s.descripcion,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                              '🗂️ ${s.categoria}',
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                              '➤ ${s.subcategoria.toLowerCase()}',
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.star, size: 14),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  s.promedioEstrellas
-                                                      .toString(),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                const Icon(
-                                                  Icons.location_on,
-                                                  size: 14,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Expanded(
-                                                  child: Text(
-                                                    s.ubicacion,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                  const SizedBox(width: 8),
+                                                  const Icon(
+                                                    Icons.location_on,
+                                                    size: 14,
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                                  const SizedBox(width: 4),
+                                                  Expanded(
+                                                    child: Text(
+                                                      s.ubicacion,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 

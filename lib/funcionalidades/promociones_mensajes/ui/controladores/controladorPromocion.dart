@@ -3,8 +3,8 @@ import 'package:prestaservicios/funcionalidades/promociones_mensajes/dominio/cas
 class ControladorPromocion {
   final casoUsoPromociones casopromo;
   ControladorPromocion({required this.casopromo});
-  Future<Map<String, dynamic>> getpromociones() async {
-    return await casopromo.getpromociones();
+  Future<Map<String, dynamic>> getpromociones(String usuario_id)async {
+    return await casopromo.getpromociones(usuario_id);
   }
 
   Future<Map<String, dynamic>> getMensajes(String id) async {
@@ -51,7 +51,7 @@ class ControladorPromocion {
     return await casopromo.validarCupon(cupon, paymentid);
   }
 
-  Future<Map<String, dynamic>> validarCodigo(String codigo) async {
-    return await casopromo.validarCodigo(codigo);
+  Future<Map<String, dynamic>> validarCodigo(String codigo,String usuario_id) async {
+    return await casopromo.validarCodigo(codigo,usuario_id);
   }
 }

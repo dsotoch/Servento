@@ -1,6 +1,6 @@
 <?php
 include_once("conexion.php");
-require 'stripe_auth.php';
+require_once 'flow_auth.php';
 
 try {
     // Configuración
@@ -21,23 +21,11 @@ try {
     $meses = $diff->y * 12 + $diff->m;
     if ($meses < 1) $meses = 1;
 
-    // Crear cupón de monto fijo
-    $cupon = \Stripe\Coupon::create([
-        'amount_off' => $monto,
-        'currency' => $MONEDA,
-        'duration' => 'repeating',
-        'duration_in_months' => $meses
-    ]);
 
-    $promo = \Stripe\PromotionCode::create([
-        'promotion' => [
-            'type' => 'coupon',
-            'coupon' =>  $cupon->id,
-        ],
-        'code' => $codigo,
-        'expires_at' => strtotime($vigencia)
-    ]);
-    $promo_id = $promo->id;
+
+    $cupon=crearCuponFlow($codigo,$monto,$vigencia);
+
+    $promo_id = $cupon->id;
 } catch (\Exception $e) {
     throw new Exception($e->getMessage());
 }

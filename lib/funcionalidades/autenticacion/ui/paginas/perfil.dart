@@ -182,7 +182,7 @@ class _PantallaRegistroContinuacionState
             TextField(
               controller: telefonoController,
               keyboardType: TextInputType.number,
-              maxLength: 10,
+              maxLength: 9,
               decoration: InputDecoration(
                 labelText: 'Número de teléfono',
                 prefixIcon: const Icon(Icons.phone, color: Color(0xFF00BFA6)),
@@ -201,7 +201,7 @@ class _PantallaRegistroContinuacionState
             TextField(
               controller: whatsappController,
               keyboardType: TextInputType.number,
-              maxLength: 10,
+              maxLength: 9,
               decoration: InputDecoration(
                 labelText: 'Número de WhatsApp',
                 prefixIcon: const Icon(Icons.message, color: Color(0xFF00BFA6)),
@@ -254,7 +254,7 @@ class _PantallaRegistroContinuacionState
                   vertical: 15,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(5),
                 ),
                 elevation: 6,
               ),

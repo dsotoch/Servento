@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:location/location.dart';
+import 'package:prestaservicios/compartido/colores.dart';
 import 'package:prestaservicios/compartido/funciones.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/datos/modelos/usuarioModel.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/datos/repositorios/repositorioAuth.dart';
@@ -39,7 +40,8 @@ class _PantallaLoginState extends State<PantallaLogin> {
   bool cargando = false;
   LocationData? locationData;
   User? _usuarioFirebase;
-
+  bool recordarPassword = false;
+  bool verPassword = false;
   @override
   void initState() {
     super.initState();
@@ -50,7 +52,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
     _googleSignIn.onCurrentUserChanged.listen(
       (GoogleSignInAccount? cuenta) async {},
     );
-
+    cargarCredenciales();
     _googleSignIn.signInSilently();
   }
 
@@ -100,8 +102,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
       );
       return;
     }
-    if (!await activarGPS()) {
-      return;
+    if (!kIsWeb) {
+      if (!await activarGPS()) {
+        return;
+      }
     }
 
     setState(() => cargando = true);
@@ -110,7 +114,15 @@ class _PantallaLoginState extends State<PantallaLogin> {
       final respuesta = await controladorAuth.loguearse(user, pass);
 
       if (respuesta['success'] == true) {
-        if (respuesta["mensaje"] == "CuentanoVerificada") {
+        await guardarCredenciales();
+        if (respuesta["mensaje"] == "Correo no verificado") {
+          await Funciones().mostrarMensaje(
+            "error",
+            "Correo no verificado.Revisa tu bandeja de Entrada o Spam",
+          );
+          return;
+        }
+        if (respuesta["mensaje"] == "Cuentanoverificada") {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -128,7 +140,12 @@ class _PantallaLoginState extends State<PantallaLogin> {
           MaterialPageRoute(
             builder: (context) => PantallaPrincipalGrid(
               usuario: usuario,
-              location: locationData!,
+              location:
+                  locationData ??
+                  LocationData.fromMap({
+                    "latitude": -12.0464,
+                    "longitude": -77.0428,
+                  }),
             ),
           ),
         );
@@ -249,6 +266,35 @@ class _PantallaLoginState extends State<PantallaLogin> {
     }
   }
 
+  Future<void> guardarCredenciales() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (recordarPassword) {
+      await prefs.setString('email', userController.text);
+      await prefs.setString('password', passController.text);
+      await prefs.setBool('recordar', true);
+    } else {
+      await prefs.remove('email');
+      await prefs.remove('password');
+      await prefs.setBool('recordar', false);
+    }
+  }
+
+  Future<void> cargarCredenciales() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    bool recordar = prefs.getBool('recordar') ?? false;
+
+    if (recordar) {
+      userController.text = prefs.getString('email') ?? '';
+      passController.text = prefs.getString('password') ?? '';
+
+      setState(() {
+        recordarPassword = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -256,7 +302,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
         decoration: BoxDecoration(
           // Fondo degradado de toda la pantalla
           gradient: LinearGradient(
-            colors: [Colors.purple, Colors.black],
+            colors: [Colores.color_primario, Colors.black],
             begin: Alignment.topCenter,
             end: Alignment.bottomRight,
           ),
@@ -267,7 +313,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
               padding: const EdgeInsets.all(30),
               margin: const EdgeInsets.symmetric(horizontal: 25),
               decoration: BoxDecoration(
-                color: Colors.white70,
+                color: Colores.color_secundario,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
                   topRight: Radius.circular(50),
@@ -283,20 +329,12 @@ class _PantallaLoginState extends State<PantallaLogin> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.lock_outline,
                     size: 70,
-                    color: Colors.purple,
+                    color: Colores.color_primario,
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Cuca la Curra',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF00695C),
-                    ),
-                  ),
+
                   const SizedBox(height: 8),
                   const Text(
                     'Inicia sesión para continuar',
@@ -307,9 +345,9 @@ class _PantallaLoginState extends State<PantallaLogin> {
                     height: 180,
                     width: 200, // importante que sea cuadrado
                     decoration: BoxDecoration(
-                      shape: BoxShape.rectangle, // esto hace el avatar
+                      shape: BoxShape.circle, // esto hace el avatar
                       image: const DecorationImage(
-                        image: AssetImage("assets/images/cuca.jpeg"),
+                        image: AssetImage("assets/images/cuca.png"),
                         fit: BoxFit.contain, // cubrir todo el círculo
                       ),
                       boxShadow: [
@@ -349,13 +387,27 @@ class _PantallaLoginState extends State<PantallaLogin> {
                   // Campo contraseña
                   TextField(
                     controller: passController,
-                    obscureText: true,
+                    obscureText: !verPassword,
                     decoration: InputDecoration(
                       hintText: 'Contraseña',
                       prefixIcon: const Icon(
                         Icons.lock_outline,
                         color: Color(0xFF00BFA6),
                       ),
+
+                      // OJO PARA MOSTRAR / OCULTAR
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          verPassword ? Icons.visibility : Icons.visibility_off,
+                          color: const Color(0xFF00BFA6),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            verPassword = !verPassword;
+                          });
+                        },
+                      ),
+
                       filled: true,
                       fillColor: const Color(0xFFF1FDFB),
                       contentPadding: const EdgeInsets.symmetric(
@@ -368,7 +420,21 @@ class _PantallaLoginState extends State<PantallaLogin> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: recordarPassword,
+                        onChanged: (value) {
+                          setState(() {
+                            recordarPassword = value!;
+                          });
+                        },
+                      ),
+                      const Text("Guardar contraseña"),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
 
                   // Botón iniciar sesión
                   ElevatedButton(
@@ -380,7 +446,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                         vertical: 15,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       elevation: 6,
                     ),
@@ -418,7 +484,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                         style: TextStyle(
                           color: Color(0xFF009688),
                           fontSize: 15,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -446,7 +512,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                         style: TextStyle(
                           color: Color(0xFF009688),
                           fontSize: 15,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
                         ),
                       ),

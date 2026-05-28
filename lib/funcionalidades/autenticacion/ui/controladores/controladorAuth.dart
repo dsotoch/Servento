@@ -10,13 +10,24 @@ class ControladorAuth {
     return await usoAuth.loguearse(user, pass);
   }
 
+  Future<Map<String, dynamic>> resetPass(String email) async {
+    return await usoAuth.resetPass(email);
+  }
+
   Future<Map<String, dynamic>> registrarse(
     String email,
     String pass,
     String usuario,
     String telefono,
   ) async {
-    return await usoAuth.registrarse(email, pass, usuario,telefono);
+    return await usoAuth.registrarse(email, pass, usuario, telefono);
+  }
+
+  Future<Map<String, dynamic>> validarEmailAndTelefono(
+    String email,
+    String telefono,
+  ) async {
+    return await usoAuth.validarEmailAndTelefono(email, telefono);
   }
 
   Future<Map<String, dynamic>> actualizar(Usuario usuario) async {
@@ -34,13 +45,16 @@ class ControladorAuth {
   Future<Map<String, dynamic>> passFirebase(UsuarioModel usuario) async {
     return await usoAuth.cambiarPass(usuario);
   }
+
   Future<Map<String, dynamic>> enviarCodigo(String telefono) async {
     return await usoAuth.enviarCodigo(telefono);
   }
-    Future<Map<String, dynamic>> verificarOtp(String telefono,String s) async {
-    return await usoAuth.validarCodigo(telefono,s);
+
+  Future<Map<String, dynamic>> verificarOtp(String telefono, String s) async {
+    return await usoAuth.validarCodigo(telefono, s);
   }
-   Future<Map<String, dynamic>> reenviarCodigo(String telefono) async {
+
+  Future<Map<String, dynamic>> reenviarCodigo(String telefono) async {
     return await usoAuth.reenviarCodigo(telefono);
   }
 }

@@ -8,7 +8,7 @@ class Funciones {
   Future<void> mostrarMensaje(String tipo, String mensaje) async {
     Fluttertoast.showToast(
       msg: mensaje,
-      toastLength: Toast.LENGTH_SHORT,
+      toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM_RIGHT,
       backgroundColor: tipo == "ok" ? Colors.green : Colors.red,
       textColor: Colors.white,

@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:prestaservicios/compartido/colores.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/paginas/login.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/paginas/registro.dart';
 
@@ -18,6 +17,23 @@ class _Inicio extends State<Inicio> {
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(seconds: 1), () {
+      checkForUpdate();
+    });
+  }
+   Future<void> checkForUpdate() async {
+    try {
+      AppUpdateInfo info = await InAppUpdate.checkForUpdate();
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        // UPDATE INMEDIATO
+        if (info.immediateUpdateAllowed) {
+          await InAppUpdate.performImmediateUpdate();
+        }
+      }
+    } catch (e) {
+      debugPrint("Error update: $e");
+    }
   }
 
   @override
@@ -27,7 +43,7 @@ class _Inicio extends State<Inicio> {
         decoration: BoxDecoration(
           // Fondo degradado de toda la pantalla
           gradient: LinearGradient(
-            colors: [Colors.purple, Colors.black],
+            colors: [Colores.color_primario, Colors.black],
             begin: Alignment.topCenter,
             end: Alignment.bottomRight,
           ),
@@ -38,7 +54,7 @@ class _Inicio extends State<Inicio> {
               padding: const EdgeInsets.all(30),
               margin: const EdgeInsets.symmetric(horizontal: 25),
               decoration: BoxDecoration(
-                color: Colors.white70,
+                color: Colores.color_secundario,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
                   topRight: Radius.circular(50),
@@ -56,10 +72,10 @@ class _Inicio extends State<Inicio> {
                 children: [
                   ShaderMask(
                     shaderCallback: (bounds) => LinearGradient(
-                      colors: [Colors.purple, Colors.black],
+                      colors: [Colores.color_primario, Colors.black],
                     ).createShader(bounds),
-                    child: const Text(
-                      'Cuca la Curra',
+                    child:  Text(
+                      'Bienvenido',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
@@ -72,9 +88,9 @@ class _Inicio extends State<Inicio> {
                     height: 180,
                     width: 200, // importante que sea cuadrado
                     decoration: BoxDecoration(
-                      shape: BoxShape.rectangle, // esto hace el avatar
+                      shape: BoxShape.circle, // esto hace el avatar
                       image: const DecorationImage(
-                        image: AssetImage("assets/images/cuca.jpeg"),
+                        image: AssetImage("assets/images/cuca.png"),
                         fit: BoxFit.contain, // cubrir todo el círculo
                       ),
                       boxShadow: [
@@ -101,7 +117,7 @@ class _Inicio extends State<Inicio> {
                         vertical: 15,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       elevation: 6,
                     ),
@@ -129,7 +145,7 @@ class _Inicio extends State<Inicio> {
                         vertical: 15,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       elevation: 6,
                     ),

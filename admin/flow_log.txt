@@ -1,0 +1,24 @@
+{"code":501,"message":"Internal Server Error - You can not have 2 active coupons with the same name"}
+{"id":1171,"name":"181303","percent_off":null,"currency":"PEN","amount":"100.00","created":"2026-05-19 15:53:07","duration":0,"times":null,"max_redemptions":null,"expires":"2026-05-22 00:00:00","status":1,"redemtions":0}
+{"id":1172,"name":"PROMOSTART","percent_off":null,"currency":"PEN","amount":"100.00","created":"2026-05-19 15:57:33","duration":0,"times":null,"max_redemptions":null,"expires":"2026-05-27 00:00:00","status":1,"redemtions":0}
+{"id":1172,"name":"PROMOSTART","percent_off":null,"currency":"PEN","amount":"100.00","created":"2026-05-19 15:57:33","duration":0,"times":null,"max_redemptions":null,"expires":"2026-05-27 00:00:00","status":0,"redemtions":0}
+{"id":1173,"name":"PROMOSTART","percent_off":null,"currency":"PEN","amount":"10.00","created":"2026-05-19 16:07:48","duration":0,"times":null,"max_redemptions":null,"expires":"2026-05-29 00:00:00","status":1,"redemtions":0}
+{"code":1901,"message":"The minimum amount is 1 PEN"}
+{"token":"55A379C9084AF63AEF531AFDC333E7D122D64E1L","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7342932}
+{"token":"4526CF505EAB929A7FFFFF35A5B17D08AEFE736Q","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7342938}
+{"token":"EEF8072008F26739D57C4765C286410BF738F22J","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7343342}
+{"token":"E2780B9C1F442F674F7F9CB95A451FAB953E796M","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7388513}
+{"token":"9C5B9DD1F156787D35E405FD284FC21ED6630E2V","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7389826}
+{"token":"5D646E11AA617F9033ECAC4924E6B35556814E6M","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7390052}
+{"token":"03587B9356EA80CBBCFB2BB756AD26F45759EF1R","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7390319}
+{"token":"DEC2B8044A3F3F2E93ABEF8CF63CE1E75CA839FU","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7498878}
+{"token":"A62555DFF39230C4DF95C14946DDFD0C7CE55E6H","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7498935}
+{"token":"457FC24BB3AEF401AA0FE9D18BDCDC698AE8179S","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7500702}
+{"token":"BC5B732AF7874983B68E6CCBDF5EB0F5970F12CY","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7501152}
+{"token":"8A4C3222FD6BD1F28ACB0E3984D9440F5B7808DN","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502020}
+{"token":"F4B1F5A0C15AC6FB0D5219E91D70DA4A3AF4165N","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502349}
+{"token":"AE253FB98D90BFF38BC8AE19150CCEAFB201DD1E","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502363}
+{"token":"FCF3E0BB8F48FEE8661DC85C059AE833B10909CB","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502377}
+{"token":"8C3CB8ED115F28CFF2FDB4B212FEEB4DD99B918K","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502383}
+{"token":"FEE8417FFB41BD36A1025CFABB3F1726B18A70DV","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502462}
+{"token":"79FF8EFE710748B608A1E6AD4884FD35B1CF4FFC","url":"https:\/\/sandbox.flow.cl\/app\/web\/pay.php","flowOrder":7502580}

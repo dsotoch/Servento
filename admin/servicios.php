@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set("America/Lima");
 
 function guardarImagen($base64, $campo)
 {
@@ -98,21 +98,33 @@ function listarServiciosTodos($offset, $limit, $lat, $lon, $radio)
         $radio = $radio !== null ? (float)$radio : 100; // por defecto 100 km
         $limit = (int)$limit;
         $offset = (int)$offset;
-
-        // Consulta con interpolación segura para limit y offset
         $sql = "
-            SELECT s.*,
-                   (6371 * acos(
-                       cos(radians(:lat)) * cos(radians(s.lat)) *
-                       cos(radians(s.`long`) - radians(:lon)) +
-                       sin(radians(:lat)) * sin(radians(s.lat))
-                   )) AS distancia
-            FROM vis_servicios s INNER JOIN usuarios us ON s.usuario_id=us.id
-            WHERE us.estado='ACTIVO'
-            HAVING distancia <= :radio
-            ORDER BY distancia ASC
-            LIMIT $limit OFFSET $offset
-        ";
+    SELECT s.*,
+           (6371 * acos(
+               cos(radians(:lat)) * cos(radians(s.lat)) *
+               cos(radians(s.`long`) - radians(:lon)) +
+               sin(radians(:lat)) * sin(radians(s.lat))
+           )) AS distancia
+
+    FROM vis_servicios s
+
+    INNER JOIN usuarios us 
+        ON s.usuario_id = us.id
+
+    WHERE us.estado='ACTIVO'
+
+    AND NOT EXISTS (
+        SELECT 1
+        FROM interrupciones i
+        WHERE i.usuario_id = s.usuario_id
+    )
+
+    HAVING distancia <= :radio
+
+    ORDER BY distancia ASC
+
+    LIMIT $limit OFFSET $offset
+";
 
         $stmt = $pdo->prepare($sql);
 
@@ -171,54 +183,73 @@ function guardarServicio(
         $st->execute();
         $estadous = $st->fetchColumn();
         if ($estadous == "ACTIVO") {
-            $stmtUsuario = $pdo->prepare("SELECT * FROM asignaciones_pagos WHERE  usuario_id=$usuario_id ORDER BY id desc LIMIT 1");
+            $stmtUsuario = $pdo->prepare("SELECT * FROM asignaciones_pagos a INNER JOIN promociones p ON a.descripcion_plan=p.titulo  WHERE  a.usuario_id=$usuario_id ORDER BY a.id desc LIMIT 1");
             $stmtUsuario->execute();
             $usuario = $stmtUsuario->fetch(PDO::FETCH_ASSOC);
-            if ($usuario["descripcion_plan"] == "PLAN PUBLICACION") {
-                require __DIR__ . '/vendor/autoload.php';
-                $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-                $dotenv->load();
-                $postData = [
-                    'usuario_id' => $usuario['usuario_id'],
-                    'promocion' => $usuario['descripcion_plan'],
-                    'dias' => $usuario['dias'],
-                    'monto' => $usuario['monto'],
-                ];
-                $url = $_ENV["DOMINIO"];
-                $ch = curl_init($url . "/reasignar.php");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-                $response = curl_exec($ch);
-                if (curl_errno($ch)) {
-                    $error_msg = curl_error($ch);
-                }
-                curl_close($ch);
-
-                if (isset($error_msg)) {
-                    return [
-                        "success" => false,
-                        "mensaje" => "Error al enviar datos:" . $error_msg
+            if ($usuario) {
+                if ($usuario["descripcion_plan"] == "PLAN PUBLICACION") {
+                    require __DIR__ . '/vendor/autoload.php';
+                    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+                    $dotenv->load();
+                    $postData = [
+                        'usuario_id' => $usuario['usuario_id'],
+                        'promocion' => $usuario['descripcion_plan'],
+                        'dias' => $usuario['dias'],
+                        'monto' => $usuario['monto'],
                     ];
-                } else {
-                    $data = json_decode($response, true); 
+                    $url = $_ENV["DOMINIO"];
+                    $ch = curl_init($url . "/reasignar.php");
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+                    $response = curl_exec($ch);
+                    if (curl_errno($ch)) {
+                        $error_msg = curl_error($ch);
+                    }
+                    curl_close($ch);
 
-                    if ($data === null) { 
+                    if (isset($error_msg)) {
                         return [
                             "success" => false,
-                            "mensaje" => "Respuesta inválida del servidor: $response"
+                            "mensaje" => "Error al enviar datos:" . $error_msg
                         ];
-                    }
+                    } else {
+                        $data = json_decode($response, true);
 
-                    if (!isset($data["success"]) && !$data["success"] === true) {
-                       return [
-                            "success" => false,
-                            "mensaje" => $data["error"] ?? "Error desconocido"
-                        ];
+                        if ($data === null) {
+                            return [
+                                "success" => false,
+                                "mensaje" => "Respuesta inválida del servidor: $response"
+                            ];
+                        }
+
+                        if (!isset($data["success"]) && !$data["success"] === true) {
+                            return [
+                                "success" => false,
+                                "mensaje" => $data["error"] ?? "Error desconocido"
+                            ];
+                        }
+                    }
+                }
+                $dias = $usuario["dias"] ?? 1;
+
+                $hoy = new DateTime('now');
+
+                $vigencia = new DateTime($usuario["fecha_asignada"]);
+                $vigencia->add(new DateInterval("P{$dias}D"));
+                if ($hoy->getTimestamp() > $vigencia->getTimestamp()) {
+                    return ["success" => false, "mensaje" => "No puedes publicar porque ya venció la Vigencia de tu plan, selecciona uno nuevo."];
+                }
+                if (
+                    trim(
+                        preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $categoria)
+                    ) == "SERVICIOS EMPRESARIALES"
+                ) {
+                    if ($usuario["descripcion_plan"] != "PLAN GOLDEN" && $usuario["tipo"] != 'categoria') {
+                        return ["success" => false, "mensaje" => "La Categoria " . $categoria . " no esta permitido en tu Plan."];
                     }
                 }
             }
-
             $stmt = $pdo->prepare("INSERT INTO servicios 
                 (titulo, descripcion, precio, ubicacion, categoria, imagen1, imagen2, imagen3, estado, usuario_id, `lat`, `long`,subcategoria)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?)");
@@ -254,7 +285,8 @@ function modificarServicioConVariasImagenes(
     $estado,
     $lat,
     $long,
-    array $nuevasImagenes // arreglo con 0 a 3 imágenes nuevas
+    array $nuevasImagenes,
+    $sub
 ) {
     try {
         global $pdo;
@@ -294,6 +326,7 @@ function modificarServicioConVariasImagenes(
                 imagen1 = ?,
                 imagen2 = ?,
                 imagen3 = ?,
+                subcategoria=?,
                  `lat`=?, `long`=?
             WHERE id = ?
         ");
@@ -309,6 +342,7 @@ function modificarServicioConVariasImagenes(
             $imagenes['imagen1'],
             $imagenes['imagen2'],
             $imagenes['imagen3'],
+            $sub,
             $lat,
             $long,
             $id

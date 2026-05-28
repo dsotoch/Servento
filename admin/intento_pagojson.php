@@ -5,6 +5,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 date_default_timezone_set("America/Lima");
 include_once("funciones.php");
+
 global $pdo;
 $sql = "SELECT * FROM configuraciones LIMIT 1";
 $stmt = $pdo->prepare($sql);
@@ -23,10 +24,10 @@ $dias = $row["dias_vigencia"] ?? "";
 
 try {
     require 'vendor/autoload.php';
-    require_once('stripe_auth.php');
+    require_once('flow_auth.php');
 
-    $montoStripe = floatval($monto) * 100;
-    $moneda = $MONEDA ?? 'mxn';
+    $montoStripe = floatval($monto);
+    $moneda = $MONEDA ?? 'PEN';
     $descripcion = $promocion ?? 'Plan asignado';
     $usuario_id = $usuario_id;
     $tienePagoPendiente = $pdo->prepare("
@@ -39,15 +40,14 @@ try {
         throw new Exception("El usuario ya tiene un pago pendiente (ID: {$pagoExistente['id']}).");
     }
 
-    // Crear PaymentIntent
-    $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => $montoStripe,
-        'currency' => $moneda,
-        'description' => $descripcion,
-        'automatic_payment_methods' => [
-            'enabled' => true,
-        ],
-    ]);
+    $email_consulta = $pdo->prepare("
+    SELECT email FROM usuarios WHERE id = :usuario_id  LIMIT 1
+");
+    $email_consulta->execute([':usuario_id' => $usuario_id]);
+    $email_cliente = $email_consulta->fetch(PDO::FETCH_ASSOC);
+    $email = $email_cliente["email"];
+
+    $paymentIntent = crearOrdenPago($montoStripe, $email);
 
     // Guardar en tabla pagos
     $stmt = $pdo->prepare("
@@ -56,8 +56,8 @@ try {
     ");
     $stmt->execute([
         $usuario_id,
-        $paymentIntent->id,
-        $monto,
+        $paymentIntent->flowOrder,
+        $montoStripe,
         $moneda,
         $descripcion,
         'pendiente',
@@ -65,6 +65,7 @@ try {
     ]);
 
     $ultimoPagoId = $pdo->lastInsertId();
+    $urlpago = $paymentIntent->url . "?token=" . $paymentIntent->token;
 
     // Asignar la promoción al usuario
     $stmt2 = $pdo->prepare("
@@ -74,15 +75,12 @@ try {
     $stmt2->execute([
         $usuario_id,
         $descripcion,
-        $monto,
+        $montoStripe,
         date('Y-m-d'),
         $ultimoPagoId,
-        $paymentIntent->client_secret,
+        $urlpago,
         $dias
     ]);
-
-} catch (\Stripe\Exception\ApiErrorException $e) {
-    throw new Exception("Error en Stripe: " . $e->getMessage());
 } catch (\PDOException $e) {
     throw new Exception("Error en la base de datos: " . $e->getMessage());
 } catch (\Exception $e) {

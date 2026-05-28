@@ -7,6 +7,7 @@ class Promocion {
   final String? categoria;
   final String? estado; // activo, inactivo, pendiente
   final DateTime? fechaRegistro;
+  final String? diasVigencia;
 
   Promocion({
     this.id,
@@ -17,6 +18,7 @@ class Promocion {
     this.categoria,
     this.estado,
     this.fechaRegistro,
+    this.diasVigencia
   });
 
   /// 🔹 Constructor para crear una instancia desde JSON
@@ -35,6 +37,7 @@ class Promocion {
       fechaRegistro: json['fecha'] != null
           ? DateTime.tryParse(json['fecha'])
           : null,
+          diasVigencia: json["dias_vigencia"].toString()
     );
   }
 

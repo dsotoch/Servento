@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location/location.dart';
+import 'package:prestaservicios/compartido/colores.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/dominio/entidades/usuario.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/controladores/autService.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/paginas/chats.dart';
@@ -298,7 +299,7 @@ class _PantallaPrincipalGridState extends State<PantallaPrincipalGrid> {
                               padding: EdgeInsets.all(screenHeight * 0.02),
                               decoration: BoxDecoration(
 
-                                  gradient: LinearGradient(colors: [Colors.purple,Colors.black])
+                                  gradient: LinearGradient(colors: [Colores.color_primario,Colors.black])
                               ),
                               child: Column(
                                 children: [
@@ -322,7 +323,7 @@ class _PantallaPrincipalGridState extends State<PantallaPrincipalGrid> {
                                     child: CircleAvatar(
                                       radius: screenHeight * 0.07, // tamaño del avatar
                                       backgroundColor: Colors.grey[200], // color de fondo mientras carga la imagen
-                                      backgroundImage: NetworkImage("${Env.dominio}${user.foto}"),
+                                      backgroundImage: NetworkImage("${Env.dominio}/${user.foto}"),
                                     ),
                                   ),
                                   SizedBox(height: screenHeight * 0.02),
@@ -359,7 +360,7 @@ class _PantallaPrincipalGridState extends State<PantallaPrincipalGrid> {
                         child: ListView(
                           children: botones.map((btn) {
                             return ListTile(
-                              leading: Icon(btn["icono"], color: Colors.purple),
+                              leading: Icon(btn["icono"], color: Colores.color_primario),
                               title: Text(
                                 btn["titulo"],
                                 style: TextStyle(fontWeight: FontWeight.w500),
@@ -391,7 +392,7 @@ class _PantallaPrincipalGridState extends State<PantallaPrincipalGrid> {
                           style: TextStyle(color: Colors.red),
                         ),
                         onTap: () async {
-                          await AuthService.cerrarSesion();
+                          //await AuthService.cerrarSesion();
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => PantallaLogin()),
@@ -452,7 +453,7 @@ class _PantallaPrincipalGridState extends State<PantallaPrincipalGrid> {
                 itemBuilder: (context, index) {
                   final item = listabanners[index];
                   final imageUrl =
-                      "${Env.dominio}uploads/promo/${item['imagen']}";
+                      "${Env.dominio}/uploads/promo/${item['imagen']}";
                   return Stack(
                     children: [
                       // Imagen a pantalla completa

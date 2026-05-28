@@ -61,40 +61,148 @@ verificarTodosLosPagos();
 function verificarTodosLosPagos()
 {
     global $pdo;
-    $sql = "SELECT id FROM asignaciones_pagos 
-            WHERE estado='pendiente'";
+
+    $sql = "SELECT 
+        u.id,
+        ap.descripcion_plan,
+        ap.estado,
+        ap.fecha_asignada,
+        ap.dias,
+        uc.fecha,
+        c.vigencia_fin
+
+    FROM usuarios u
+
+    LEFT JOIN (
+        SELECT *
+        FROM asignaciones_pagos ap1
+        WHERE ap1.id = (
+            SELECT MAX(ap2.id)
+            FROM asignaciones_pagos ap2
+            WHERE ap2.usuario_id = ap1.usuario_id
+        )
+    ) ap 
+        ON u.id = ap.usuario_id
+
+    LEFT JOIN (
+        SELECT *
+        FROM usuario_cupon uc1
+        WHERE uc1.id = (
+            SELECT MAX(uc2.id)
+            FROM usuario_cupon uc2
+            WHERE uc2.usuario_id = uc1.usuario_id
+        )
+    ) uc 
+        ON u.id = uc.usuario_id
+
+    LEFT JOIN cupones c 
+        ON uc.cupon_id = c.id";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
+
     $asignaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (!$asignaciones) return;
+    if (!$asignaciones) {
+        return;
+    }
 
     foreach ($asignaciones as $asignacion) {
-        verificarPagoIndividual($asignacion["id"]);
+
+        if (
+            empty($asignacion['dias']) &&
+            empty($asignacion['fecha'])
+        ) {
+            continue;
+        }
+
+        verificarPagoIndividual($asignacion);
     }
 }
-function verificarPagoIndividual($id)
+
+function verificarPagoIndividual(array $data)
 {
     global $pdo;
 
-    $sql = "SELECT usuario_id, fecha_asignada FROM asignaciones_pagos WHERE id = ? LIMIT 1";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$id]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $HOY = strtotime(date("Y-m-d"));
 
-    if (!$row) return;
+    $fechas_vigencia = [];
 
-    $cliente_id      = $row['usuario_id'];
-    $fecha_asignada  = $row['fecha_asignada'];
+    // ===== PLAN =====
+    if (
+        !empty($data["fecha_asignada"]) &&
+        !empty($data["dias"]) &&
+        (strtolower(trim($data['estado'])) !== 'fallido' && strtolower(trim($data['estado'])) !== 'pendiente')
+    ) {
 
-    $fechaAsignadaDT = DateTime::createFromFormat("Y-m-d", $fecha_asignada);
+        $fechaPlan = new DateTime(
+            $data["fecha_asignada"]
+        );
 
-    $hoy = new DateTime();
+        $fechaPlan->add(
+            new DateInterval(
+                "P" . intval($data["dias"]) . "D"
+            )
+        );
 
-    if ($fechaAsignadaDT < $hoy) {
+        $fechas_vigencia[] = strtotime(
+            $fechaPlan->format("Y-m-d")
+        );
+    }
 
-        $sql = "UPDATE usuarios SET estado = 'INACTIVO' WHERE id = ?";
+    // ===== CUPÓN =====
+    if (!empty($data["vigencia_fin"])) {
+
+        $fechas_vigencia[] = strtotime(
+            $data["vigencia_fin"]
+        );
+    }
+
+    // NO TIENE NADA
+    if (empty($fechas_vigencia)) {
+        $sql = "
+            INSERT IGNORE INTO interrupciones(usuario_id,fecha)
+            VALUES(?,?)
+        ";
+
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$cliente_id]);
+
+        $stmt->execute([
+            $data['id'],
+            date("Y-m-d")
+        ]);
+        return;
+    }
+
+    // TOMAR LA MAYOR FECHA
+    $ultimaVigencia = max($fechas_vigencia);
+
+    $excluir = $HOY > $ultimaVigencia;
+
+    if ($excluir) {
+
+        $sql = "
+            INSERT IGNORE INTO interrupciones(usuario_id,fecha)
+            VALUES(?,?)
+        ";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            $data['id'],
+            date("Y-m-d")
+        ]);
+    } else {
+
+        $sql = "
+            DELETE FROM interrupciones
+            WHERE usuario_id=?
+        ";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            $data['id']
+        ]);
     }
 }

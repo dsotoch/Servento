@@ -5,8 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+
 import 'package:prestaservicios/funcionalidades/principal/ui/controlador/controladorPrincipal.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/modelos/pagoAsignado.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/repositorios/repositorioPromociones.dart';
@@ -444,14 +443,18 @@ class _MisServiciosScreenState extends State<MisServiciosScreen> {
                       onPressed: procesando
                           ? null
                           : () async {
-                              if (promocionActual == null ||
-                                  promocionActual?.estado == "pendiente") {
-                                Funciones().mostrarMensaje(
-                                  "error",
-                                  "No tienes una promoción activa o esta pendiente de pago. Debes adquirir un plan para continuar utilizando la aplicación.",
-                                );
+                             if (!await Funciones().mostrarConfirmacion(
+                                context: context,
+                                titulo: 'Confirmación',
+                                mensaje:
+                                    '¿Estas Seguro de realizar esta Operación?',
+                              ))
+                                {
+                                  return;
+                                }
+                              if (codigoController.text != "") {
                                 final rs = await controladorPromocion
-                                    .validarCodigo(codigoController.text);
+                                    .validarCodigo(codigoController.text,widget.usuarioId);
 
                                 if (rs["success"] == true) {
                                   Funciones().mostrarMensaje(
@@ -465,15 +468,18 @@ class _MisServiciosScreenState extends State<MisServiciosScreen> {
                                   );
                                   return;
                                 }
+                              } else {
+                                if (promocionActual == null ||
+                                    promocionActual?.estado == "pendiente") {
+                                  Funciones().mostrarMensaje(
+                                    "error",
+                                    "No tienes una promoción activa o esta pendiente de pago. Debes adquirir un plan para continuar utilizando la aplicación.",
+                                  );
+                                  return;
+                                }
                               }
 
-                              if (!await Funciones().mostrarConfirmacion(
-                                context: context,
-                                titulo: 'Confirmación',
-                                mensaje:
-                                    '¿Estas Seguro de realizar esta Operación?',
-                              ))
-                                return;
+                             
                               setState(() {
                                 procesando = true;
                               });
@@ -525,9 +531,14 @@ class _MisServiciosScreenState extends State<MisServiciosScreen> {
                                         )
                                         .toList();
                                   });
+                                   Navigator.pop(context);
                                 }
+                              }else{
+                                 setState(() {
+                                procesando = false;
+                              });
                               }
-                              Navigator.pop(context);
+                             
                             },
                       child: Text(
                         procesando

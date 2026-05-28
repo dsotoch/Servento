@@ -1,11 +1,28 @@
 <?php
 
 
-function listarComentarios()
+function listarComentarios($usuario_id)
 {
     try {
         global $pdo;
-        $sql = "SELECT * FROM promociones WHERE estado='activo'";
+        date_default_timezone_set("America/Lima");
+        $hoy = new DateTime();
+
+        $sql_user = "SELECT fecha_creacion 
+             FROM usuarios 
+             WHERE id = $usuario_id";
+
+        $data_user = select($pdo, $sql_user)[0];
+
+        $fecha_creacion = new DateTime($data_user["fecha_creacion"]);
+
+        $diferencia = $fecha_creacion->diff($hoy);
+
+        if ($diferencia->days > 7) {
+            $sql = "SELECT * FROM promociones WHERE estado='activo' AND tipo != 'nuevo_usuario' ";
+        } else {
+            $sql = "SELECT * FROM promociones WHERE estado='activo'";
+        }
         $data = select($pdo, $sql);
         return ["success" => true, "mensaje" => $data];
     } catch (Exception $e) {

@@ -6,7 +6,6 @@ import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/repos
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/ui/controladores/controladorPromocion.dart';
 import 'package:prestaservicios/funcionalidades/promociones_mensajes/ui/paginas/pagos.dart';
 import 'package:prestaservicios/funcionalidades/usuario/modelos/pagos.dart';
-import 'package:prestaservicios/funcionalidades/promociones_mensajes/datos/modelos/modeloPromociones.dart';
 
 class MovimientosPagosScreen extends StatefulWidget {
   final VoidCallback? onIrAPagar;
@@ -176,7 +175,7 @@ class _MovimientosPagosScreenState extends State<MovimientosPagosScreen> {
                             ),
                           ),
                           title: Text(
-                            'Pago #${pago.idAsignacion} - ${pago.montoAsignado}',
+                            'Pago #${pago.idAsignacion} - S/${pago.montoAsignado}',
                           ),
                           subtitle: Text(
                             '${pago.metodoPago} • 📅 ${pago.fechaAsignacion == null ? "Pendiente de pago" : pago.fechaAsignacion}',
@@ -219,7 +218,7 @@ class _MovimientosPagosScreenState extends State<MovimientosPagosScreen> {
             Funciones().mostrarMensaje("error", data["mensaje"]);
           }
         },
-        label: const Text('Nuevo Pago'),
+        label: const Text('Pagar'),
         icon: const Icon(Icons.add),
         backgroundColor: Colors.blueAccent,
       ),
@@ -239,7 +238,16 @@ class _MovimientosPagosScreenState extends State<MovimientosPagosScreen> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [Text("Mi Plan Actual:",style: TextStyle(color: Colors.white,fontSize: 16 ,fontWeight: FontWeight.bold))],
+              children: [
+                Text(
+                  "Mi Plan Actual:",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
             // Estado
             Container(
@@ -277,7 +285,7 @@ class _MovimientosPagosScreenState extends State<MovimientosPagosScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  "Costo mensual:  ${p.monto ?? 0}",
+                  "Costo:  S/ ${p.monto ?? 0}",
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
@@ -293,24 +301,30 @@ class _MovimientosPagosScreenState extends State<MovimientosPagosScreen> {
               spacing: 8,
               children: [
                 // 🔹 Chip con la fecha asignada
-                if (p.fechaAsignada != null)
+                if (p.estado == "exitoso")
                   Chip(
                     label: Text(
-                      "Asignado: ${DateFormat('dd/MM/yyyy').format(p.fechaAsignada)}",
+                      "Desde: ${DateFormat('dd/MM/yyyy').format(p.fechaAsignada)}",
                     ),
                     backgroundColor: Colors.blue.shade50,
                   ),
 
                 // 🔹 Chip con el estado
-                if (p.estado != null)
+                if (p.estado == "pendiente")
                   Chip(
                     label: Text(
-                      p.estado!.toUpperCase(),
+                      "Vigencia ${p.diasVigencia} dias",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    backgroundColor: p.estado!.toLowerCase() == "pendiente"
-                        ? Colors.orange.shade50
-                        : Colors.green.shade50,
+                    backgroundColor: Colors.green.shade50,
+                  ),
+                if (p.estado == "exitoso")
+                  Chip(
+                    label: Text(
+                      "Hasta: ${DateFormat('dd/MM/yyyy').format(p.fechaAsignada.add(Duration(days: int.tryParse(p.diasVigencia)!)))} ",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    backgroundColor: Colors.green.shade50,
                   ),
               ],
             ),

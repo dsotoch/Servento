@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prestaservicios/compartido/colores.dart';
 import 'package:prestaservicios/compartido/funciones.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/datos/repositorios/repositorioAuth.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/controladores/controladorAuth.dart';
@@ -49,6 +50,15 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
     setState(() => cargando = true);
 
     try {
+      final validar = await controladorAuth.validarEmailAndTelefono(
+        user,
+        telefono,
+      );
+      if (validar["success"] == false) {
+        setState(() => cargando = false);
+        await Funciones().mostrarMensaje("error", validar["mensaje"] ?? "");
+        return;
+      }
       final registroResponse = await controladorAuth.registrarse(
         user,
         pass,
@@ -68,21 +78,12 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
         );
         return;
       }
-
-      _mostrarSnackbar('Enviando código...', Colors.blue);
-
-      final enviarOtpResponse = await controladorAuth.enviarCodigo(telefono);
-
-      if (enviarOtpResponse['success'] != true) {
-        _mostrarSnackbar(
-          enviarOtpResponse['message'] ?? 'Error al enviar código',
-          Colors.redAccent,
-        );
-      }
-
-      final verificado = await _verificarOtpConIntentos(telefono);
-
-      if (!verificado) return;
+      _mostrarSnackbar('Solicitando verificacion...', Colors.blue);
+      await controladorAuth.enviarCodigo(user);
+      await Funciones().mostrarMensaje(
+        "ok",
+        "Revisa tu correo para activar tu cuenta. Si no lo ves, revisa la carpeta de spam.",
+      );
 
       Navigator.pushReplacement(
         context,
@@ -131,7 +132,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
       telefono,
       otpCode,
     );
-
+    print(verificarOtpResponse);
     if (verificarOtpResponse['success'] != true) {
       _mostrarSnackbar(
         verificarOtpResponse['message'] ?? 'Código incorrecto',
@@ -184,7 +185,6 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(5),
@@ -192,7 +192,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
             padding: const EdgeInsets.all(25),
             margin: const EdgeInsets.symmetric(horizontal: 25),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colores.color_secundario,
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
@@ -205,10 +205,10 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                 Icon(
                   Icons.person_add_alt_1,
                   size: 70,
-                  color: Colors.purple,
+                  color: Colores.color_primario,
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -316,7 +316,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
                       vertical: 15,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     elevation: 6,
                   ),
@@ -333,13 +333,14 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
                 // Ir a login
                 GestureDetector(
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PantallaLogin(),)),
                   child: const Text(
                     '¿Ya tienes cuenta? Inicia sesión',
                     style: TextStyle(
                       color: Color(0xFF009688),
                       fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline
                     ),
                   ),
                 ),

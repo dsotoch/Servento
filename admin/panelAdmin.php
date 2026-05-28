@@ -15,6 +15,7 @@ date_default_timezone_set('America/Lima');
 
 // ===== CONFIG DB =====
 include_once("conexion.php");
+require_once "env.php";
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $sql = "SELECT * FROM configuraciones LIMIT 1";
 $stmtw = $pdo->prepare($sql);
@@ -112,44 +113,48 @@ include_once("peticiones.php");
             border: 1px solid #a3c9f1;
             /* azul pastel */
         }
+
         nav-tabs {
-    background: linear-gradient(to right, #9f0b8e, #7b0b70);
-    border-radius: 0.5rem;
-    padding: 0.25rem;
-}
+            background: linear-gradient(to right, #9f0b8e, #7b0b70);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
 
-/* Tabs inactivas */
-.nav-tabs .nav-link {
-    color: black;
-    background-color: transparent;
-    border: none;
-    margin-right: 0.25rem;
-    border-radius: 0.5rem 0.5rem 0 0;
-    transition: all 0.3s ease;
-}
+        /* Tabs inactivas */
+        .nav-tabs .nav-link {
+            color: black;
+            background-color: transparent;
+            border: none;
+            margin-right: 0.25rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            transition: all 0.3s ease;
+        }
 
-/* Hover para las tabs inactivas */
-.nav-tabs .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
+        /* Hover para las tabs inactivas */
+        .nav-tabs .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
 
-/* Tab activa */
-.nav-tabs .nav-link.active {
-    background-color: #b20fc0; /* morado brillante para resaltar */
-    color: white !important;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-.filtros{
-    border:1px solid #9f0b8e;
-    border-radius:5px;
-}
-.bg-primary{
-    background-color: #9f0b8e !important;
-    color: white !important;
-     border: 1px solid #9f0b8e !important;  
-}
+        /* Tab activa */
+        .nav-tabs .nav-link.active {
+            background-color: #b20fc0;
+            /* morado brillante para resaltar */
+            color: white !important;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .filtros {
+            border: 1px solid #9f0b8e;
+            border-radius: 5px;
+        }
+
+        .bg-primary {
+            background-color: #9f0b8e !important;
+            color: white !important;
+            border: 1px solid #9f0b8e !important;
+        }
     </style>
 
 
@@ -192,34 +197,34 @@ include_once("peticiones.php");
 
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
-    <li class="nav-item">
-        <button class="nav-link active" id="tab-servicios" data-bs-toggle="tab" data-bs-target="#tabServicios">Servicios</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-promos" data-bs-toggle="tab" data-bs-target="#tabPromos">Promociones</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#tabClientes">Clientes</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-pagos" data-bs-toggle="tab" data-bs-target="#tabPagos">Pagos</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-cupones" data-bs-toggle="tab" data-bs-target="#tabCupones">Cupones</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-codigos" data-bs-toggle="tab" data-bs-target="#tabCodigo">Códigos</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-categ" data-bs-toggle="tab" data-bs-target="#tabCate">Categorías</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-user" data-bs-toggle="tab" data-bs-target="#tabUser">Usuarios</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" id="tab-config" data-bs-toggle="tab" data-bs-target="#tabConfig">Configuraciones</button>
-    </li>
-</ul>
+        <li class="nav-item">
+            <button class="nav-link active" id="tab-servicios" data-bs-toggle="tab" data-bs-target="#tabServicios">Servicios</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-promos" data-bs-toggle="tab" data-bs-target="#tabPromos">Promociones</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#tabClientes">Clientes</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-pagos" data-bs-toggle="tab" data-bs-target="#tabPagos">Pagos</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-cupones" data-bs-toggle="tab" data-bs-target="#tabCupones">Cupones</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-codigos" data-bs-toggle="tab" data-bs-target="#tabCodigo">Códigos</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-categ" data-bs-toggle="tab" data-bs-target="#tabCate">Categorías</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-user" data-bs-toggle="tab" data-bs-target="#tabUser">Usuarios</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-config" data-bs-toggle="tab" data-bs-target="#tabConfig">Configuraciones</button>
+        </li>
+    </ul>
 
 
     <div class="tab-content">
@@ -233,21 +238,23 @@ include_once("peticiones.php");
                 <div class="row g-2 align-items-center">
                     <div class="col-md-6"><input id="qServicios" class="form-control" placeholder="Buscar servicio..."></div>
                     <div class="col-md-2">
-                                        <label for="" class="mb-1"><b>Estado Publicación</b></label>
-<select id="filterEstadoServicios" class="form-select">
+                        <label for="" class="mb-1"><b>Estado Publicación</b></label>
+                        <select id="filterEstadoServicios" class="form-select">
                             <option value="">Todos</option>
                             <option value="pendiente">Pendientes</option>
                             <option value="inactivo">Inactivos</option>
                             <option value="activo">Activos</option>
-                        </select></div>
+                        </select>
+                    </div>
                     <div class="col-md-2">
-                                                                <label for="" class="mb-1"><b>Cantidad de Registros</b></label>
+                        <label for="" class="mb-1"><b>Cantidad de Registros</b></label>
 
                         <select id="limitServicios" class="form-select">
                             <option>25</option>
                             <option selected>50</option>
                             <option>100</option>
-                        </select></div>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="card p-3 mb-3">
@@ -278,22 +285,24 @@ include_once("peticiones.php");
 
         <!-- TAB PROMOCIONES -->
         <div class="tab-pane fade" id="tabPromos">
-<div class="card p-3 mb-3  shadow-sm filtros">
+            <div class="card p-3 mb-3  shadow-sm filtros">
                 <label for="" class="mb-2"><b>Panel de Filtros</b></label>
-                                <div class="row g-2 align-items-center">
+                <div class="row g-2 align-items-center">
                     <div class="col-md-6"><input id="qPromos" class="form-control" placeholder="Buscar por título..."></div>
-                    <div class="col-md-2">                <label for="" class="mb-1"><b>Estado de la Promocion</b></label>
-<select id="filterEstadoPromos" class="form-select">
+                    <div class="col-md-2"> <label for="" class="mb-1"><b>Estado de la Promocion</b></label>
+                        <select id="filterEstadoPromos" class="form-select">
                             <option value="">Todos</option>
                             <option value="activo">Activos</option>
                             <option value="inactivo">Inactivos</option>
-                        </select></div>
-                    <div class="col-md-2">                <label for="" class="mb-1"><b>Cantidad de Registros</b></label>
-<select id="limitPromos" class="form-select">
+                        </select>
+                    </div>
+                    <div class="col-md-2"> <label for="" class="mb-1"><b>Cantidad de Registros</b></label>
+                        <select id="limitPromos" class="form-select">
                             <option>10</option>
                             <option selected>25</option>
                             <option>50</option>
-                        </select></div>
+                        </select>
+                    </div>
                     <div class="col-md-2 text-end"><button class="btn btn-accent btn-sm" onclick="openPromoEdit(null)">✏️ Nueva Promo</button></div>
                 </div>
             </div>
@@ -323,15 +332,16 @@ include_once("peticiones.php");
         </div>
         <!-- TAB CLIENTES -->
         <div class="tab-pane fade" id="tabClientes">
-<div class="card p-3 mb-3  shadow-sm filtros">
-                <label for="" class="mb-2"><b>Panel de Filtros</b></label>                <div class="row g-2 align-items-center">
+            <div class="card p-3 mb-3  shadow-sm filtros">
+                <label for="" class="mb-2"><b>Panel de Filtros</b></label>
+                <div class="row g-2 align-items-center">
                     <div class="col-md-6"><input id="qClientes" class="form-control" placeholder="Buscar por Nombre o Correo ..."></div>
-                    <div class="col-md-2">  <label for="" class="mb-1"><b>Estado del Cliente</b></label> <select id="filterEstadoClientes" class="form-select">
+                    <div class="col-md-2"> <label for="" class="mb-1"><b>Estado del Cliente</b></label> <select id="filterEstadoClientes" class="form-select">
                             <option value="">Todos</option>
                             <option value="activo">Activos</option>
                             <option value="inactivo">Inactivos</option>
                         </select></div>
-                    <div class="col-md-2">  <label for="" class="mb-1"><b>Cantidad de Registros</b></label> <select id="limitClientes" class="form-select">
+                    <div class="col-md-2"> <label for="" class="mb-1"><b>Cantidad de Registros</b></label> <select id="limitClientes" class="form-select">
                             <option>10</option>
                             <option selected>25</option>
                             <option>50</option>
@@ -342,9 +352,9 @@ include_once("peticiones.php");
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                         <span class="badge bg-success me-2">Pagado ✅</span>
-                <span class="badge bg-danger text-white me-2">Pendiente ⏳</span>
-                <span class="badge bg-light text-dark">Sin Promocion Asignada --</span>
-                <span class="badge bg-warning text-white me-2">Reasignar Promocion 💵</span>
+                        <span class="badge bg-danger text-white me-2">Pendiente ⏳</span>
+                        <span class="badge bg-light text-dark">Sin Promocion Asignada --</span>
+                        <span class="badge bg-warning text-white me-2">Reasignar Promocion 💵</span>
                     </div>
                     <div><button type="button" class="btn btn-sm btn-info" onclick="enviarMensajeTodos()">Enviar Mensaje a Todos</button></div>
                 </div>
@@ -356,15 +366,15 @@ include_once("peticiones.php");
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle" id="tablaClientes">
                         <thead>
-    <tr>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white">ID</th>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white">Cliente</th>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white">Promocion Asignada(Vigencia) - Costo</th>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white">Estado</th>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white">Fecha de Registro</th>
-        <th style="border:1px solid #ffff;" class="bg-primary text-white text-center">Acciones</th>
-    </tr>
-</thead>
+                            <tr>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white">ID</th>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white">Cliente</th>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white">Promocion Asignada(Vigencia) - Costo</th>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white">Estado</th>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white">Fecha de Registro</th>
+                                <th style="border:1px solid #ffff;" class="bg-primary text-white text-center">Acciones</th>
+                            </tr>
+                        </thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -399,8 +409,8 @@ include_once("peticiones.php");
                     <div class="mb-3">
                         <label for="moneda_sistema" class="form-label">Moneda</label>
                         <select class="form-select" id="moneda_sistema" name="moneda_sistema" required>
-                            <option value="usd">USD - Dólares</option>
-                            <option value="mxn">MXN - Pesos Mexicanos</option>
+                            <option value="PEN" selected>PEN - Soles</option>
+                           
                         </select>
                     </div>
 
@@ -542,7 +552,7 @@ include_once("peticiones.php");
             transition: color 0.2s ease;
         " onmouseover="this.style.color='#ff1a1a'" onmouseout="this.style.color='#ff4d4d'">&times;</span>
 
-               <div style="
+                <div style="
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
     padding:20px;
     border-radius:12px;
@@ -551,33 +561,33 @@ include_once("peticiones.php");
     margin-bottom:15px;
 ">
 
-    <h2 style="margin-top:0; font-size:22px; font-weight:bold;">
-        👤 Datos del Usuario
-    </h2>
+                    <h2 style="margin-top:0; font-size:22px; font-weight:bold;">
+                        👤 Datos del Usuario
+                    </h2>
 
-    <div style="
+                    <div style="
         background: rgba(255,255,255,0.1);
         padding:15px;
         border-radius:10px;
         backdrop-filter: blur(5px);
     ">
-        <p style="margin:6px 0;">
-            <strong>Nombre:</strong> 
-            <span id="usuarioNombre"></span>
-        </p>
+                        <p style="margin:6px 0;">
+                            <strong>Nombre:</strong>
+                            <span id="usuarioNombre"></span>
+                        </p>
 
-        <p style="margin:6px 0;">
-            <strong>Email:</strong> 
-            <span id="usuarioEmail"></span>
-        </p>
+                        <p style="margin:6px 0;">
+                            <strong>Email:</strong>
+                            <span id="usuarioEmail"></span>
+                        </p>
 
-        <p style="margin:6px 0;">
-            <strong>Teléfono:</strong> 
-            <span id="usuarioTelefono"></span>
-        </p>
-    </div>
+                        <p style="margin:6px 0;">
+                            <strong>Teléfono:</strong>
+                            <span id="usuarioTelefono"></span>
+                        </p>
+                    </div>
 
-</div>
+                </div>
 
                 <!-- Documentos / Imágenes -->
                 <h3 style="color:#1e40af; margin-top:20px; font-size:20px;"><b>Documentos Subidos</b></h3>
@@ -844,7 +854,7 @@ include_once("peticiones.php");
                 });
             }
 
-            async function editarCategoria(id, tipo='') {
+            async function editarCategoria(id, tipo = '') {
                 try {
                     // Mostrar un loader simple mientras se consulta
                     Swal.fire({
@@ -876,34 +886,34 @@ include_once("peticiones.php");
                     const contenedorPadre = document.getElementById('contenedorCategoriaPadre');
                     const categoriaPadre = document.getElementById('categoriaPadre');
 
-if (cat.categoria_id) {
-    const value = String(cat.categoria_id);
+                    if (cat.categoria_id) {
+                        const value = cat.categoria_id;
 
-    let existe = Array.from(categoriaPadre.options).some(opt => opt.value === value);
+                        let existe = Array.from(categoriaPadre.options).some(opt => opt.value == value);
 
-    if (!existe) {
-        let option = document.createElement('option');
-        option.value = value;
-        option.text = 'Categoría temporal';
-        categoriaPadre.add(option);
-    }
+                        if (!existe) {
+                            let option = document.createElement('option');
+                            option.value = value;
+                            option.text = 'Categoría temporal';
+                            categoriaPadre.add(option);
+                        }
 
-    categoriaPadre.value = value;
-categoriaPadre.dispatchEvent(new Event('change', { bubbles: true }));
-categoriaPadre.blur();
-categoriaPadre.focus();
+                        categoriaPadre.value = value;
+                        categoriaPadre.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+                        categoriaPadre.blur();
+                        categoriaPadre.focus();
 
-    tipoSelect.value = 'subcategoria';
-    contenedorPadre.style.display = 'block';
-  
-
-} else {
-    tipoSelect.value = 'categoria';
-    contenedorPadre.style.display = 'none';
-    categoriaPadre.value = '';
-}
+                        tipoSelect.value = 'subcategoria';
+                        contenedorPadre.style.display = 'block';
 
 
+                    } else {
+                        tipoSelect.value = 'categoria';
+                        contenedorPadre.style.display = 'none';
+                        categoriaPadre.value = '';
+                    }
                     // Guardar el ID en dataset para saber que es edición
                     const form = document.getElementById('formCategoria');
                     form.dataset.id = cat.id;
@@ -1107,7 +1117,7 @@ categoriaPadre.focus();
                     ${escapeHtml((s.email||''))}
                     </div></td><td class="${
     s.pago_fecha && s.pago_monto 
-        ? (s.pago_estado === 'pendiente' ? 'bg-danger text-white' : 'bg-success') 
+        ? (s.pago_estado === 'pendiente'        || s.pago_estado === 'fallido' ? 'bg-danger text-white' : 'bg-success') 
         : ''
 }">
     ${
@@ -1128,7 +1138,7 @@ categoriaPadre.focus();
   }
 </td>
 
-                    <td class="small-muted">${s.fecha_creacion||''}</td><td><button class="btn btn-sm btn-outline-dark me-1" onclick="showDetalleCliente(${s.id})">Ver Pago</button><button class="btn btn-sm btn-accent me-1" onclick="toggleEstadoCliente(${s.id})">${s.estado==='ACTIVO'?'Desactivar':'Activar'}</button><button title='Eliminar Cliente' onclick="EliminarCliente(${s.id})" class='btn btn-sm btn-danger'>X</button> ${diffDays >0 ? `<button title="Reasignar Promocion" onclick="reasignar(${s.id},this)" class="btn btn-sm btn-warning ms-1" >💵</button>` : ''} <button class="btn btn-sm bg-blue text-white" title="Enviar Mensaje" onclick="enviarMensaje(${s.id})">⌨️</button><button class="btn-sm  m-2 bg-primario" onclick="Mensajes(${s.id})" title="Ver Chats"> Ⓜ️  </button><button onclick="verDocumentos(${s.id});" title="Ver Documentos" style="cursor:pointer;">📜</button> </td>`
+                    <td class="small-muted">${s.fecha_creacion||''}</td><td><button class="btn btn-sm btn-outline-dark me-1" onclick="showDetalleCliente(${s.id})">Ver Pago</button><button class="btn btn-sm btn-accent me-1" onclick="toggleEstadoCliente(${s.ID})">${s.estado==='ACTIVO'?'Desactivar':'Activar'}</button><button title='Eliminar Cliente' onclick="EliminarCliente(${s.ID})" class='btn btn-sm btn-danger'>X</button> ${diffDays >0 ? `<button title="Reasignar Promocion" onclick="reasignar(${s.ID},this)" class="btn btn-sm btn-warning ms-1" >💵</button>` : ''} <button class="btn btn-sm bg-blue text-white" title="Enviar Mensaje" onclick="enviarMensaje(${s.ID})">⌨️</button><button class="btn-sm  m-2 bg-primario" onclick="Mensajes(${s.ID})" title="Ver Chats"> Ⓜ️  </button><button onclick="verDocumentos(${s.ID});" title="Ver Documentos" style="cursor:pointer;">📜</button> </td>`
                     tbody.appendChild(tr);
                 });
                 renderPagination('Clientes');
@@ -1446,7 +1456,7 @@ categoriaPadre.focus();
         </form>
     `;
 
-               $('#modalBody').innerHTML = `
+                $('#modalBody').innerHTML = `
 <div style="font-family:Arial, sans-serif; padding:10px;">
 
     <!-- PROMOCIÓN ACTUAL -->
@@ -1590,25 +1600,25 @@ categoriaPadre.focus();
             }
 
 
-           async function showDetalle(id) {
-    const r = await fetchJSON(`?action=list_servicios&limit=1&offset=0&q=${id}`);
-    const s = r.success && r.data.items[0] ? r.data.items[0] : null;
+            async function showDetalle(id) {
+                const r = await fetchJSON(`?action=list_servicios&limit=1&offset=0&q=${id}`);
+                const s = r.success && r.data.items[0] ? r.data.items[0] : null;
 
-    const modal = new bootstrap.Modal($('#mainModal'));
+                const modal = new bootstrap.Modal($('#mainModal'));
 
-    if (!s) {
-        $('#modalTitle').textContent = 'Detalle';
-        $('#modalBody').innerHTML = `
+                if (!s) {
+                    $('#modalTitle').textContent = 'Detalle';
+                    $('#modalBody').innerHTML = `
             <div style="padding:20px; text-align:center; color:#6c757d;">
                 Detalle no disponible
             </div>`;
-        modal.show();
-        return;
-    }
+                    modal.show();
+                    return;
+                }
 
-    $('#modalTitle').textContent = `Servicio #${s.id} — ${s.titulo}`;
+                $('#modalTitle').textContent = `Servicio #${s.id} — ${s.titulo}`;
 
-    $('#modalBody').innerHTML = `
+                $('#modalBody').innerHTML = `
     <div style="padding:10px; font-family:Arial, sans-serif;">
 
         <!-- INFO PRINCIPAL -->
@@ -1656,7 +1666,7 @@ categoriaPadre.focus();
                         background:white;
                     ">
                         <img 
-                            src="https://cucalacurra.servirentamx.com/${img}" 
+                            src="<?= $_ENV["DOMINIO"] ?>/${img}" 
                             style="
                                 width:100%;
                                 height:160px;
@@ -1692,22 +1702,23 @@ categoriaPadre.focus();
     </div>
     `;
 
-    modal.show();
-}
-function convertirAMPM(fechaStr) {
-  const fecha = new Date(fechaStr.replace(' ', 'T'));
+                modal.show();
+            }
+
+            function convertirAMPM(fechaStr) {
+                const fecha = new Date(fechaStr.replace(' ', 'T'));
 
 
-  return fecha.toLocaleString('es-MX', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  }).replace(',', '');
-}
+                return fecha.toLocaleString('es-MX', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(',', '');
+            }
             async function showDetallePago(id) {
                 const r = await fetchJSON(`?action=list_servicios&limit=1&offset=0&q=${id}`);
                 const s = r.success && r.data.items[0] ? r.data.items[0] : null;
@@ -1760,13 +1771,15 @@ function convertirAMPM(fechaStr) {
     ${p.estado === 'activo' ? 'Activo' : 'Inactivo'}
   </span>
 </td>
-<td><button class="btn btn-sm btn-accent" onclick="togglePromoEstado(${p.id})">${p.estado==='activo'?'Desactivar':'Activar'}</button> <button title="Eliminar Promocion" onclick="EliminarPromocion(${p.id})"  class="btn btn-danger btn-sm">X</button></td>`;
+<td><button class="btn btn-sm btn-warning " title="editar" onclick='openPromoEdit(${JSON.stringify(
+            JSON.stringify(p)
+        )})'>✏️</button> <button class="btn btn-sm btn-accent" onclick="togglePromoEstado(${p.id})">${p.estado==='activo'?'Desactivar':'Activar'}</button> <button title="Eliminar Promocion" onclick="EliminarPromocion(${p.id})"  class="btn btn-danger btn-sm">X</button></td>`;
                     tbody.appendChild(tr);
                 });
                 renderPagination('Promos');
             }
 
-            async function addPromocion(event) {
+            async function addPromocion(event, tipo = '') {
                 event.preventDefault();
                 if (document.getElementById("tipo").value == "categoria" && document.getElementById("categoria").value == "") {
                     alert("Selecione una Categoria");
@@ -1776,8 +1789,8 @@ function convertirAMPM(fechaStr) {
 
                 const form = document.getElementById('formPromocion');
                 const fd = new FormData(form);
-
-                const resp = await fetchJSON('?action=add_promo', {
+                const action = tipo != "" ? 'edit_promo' : 'add_promo';
+                const resp = await fetchJSON('?action=' + action, {
                     method: 'POST',
                     body: fd
                 });
@@ -1867,40 +1880,52 @@ function convertirAMPM(fechaStr) {
 
 
             // --------- MODALES PROMO ---------
-            function openPromoEdit(id) {
+            function openPromoEdit(promo) {
+
+                if (promo) {
+                    promo = JSON.parse(promo);
+
+
+                }
+
                 const modal = new bootstrap.Modal($('#mainModal'));
-                $('#modalTitle').textContent = id ? 'Editar Promoción' : 'Nueva Promoción';
+                const onsubmit = promo ?
+                    `addPromocion(event, 'editar')` :
+                    `addPromocion(event)`;
+                $('#modalTitle').textContent = promo ? 'Editar Promoción' : 'Nueva Promoción';
                 $('#modalBody').innerHTML = `
-  <form id="formPromocion" class="text-start" onsubmit="addPromocion(event)">
+  <form id="formPromocion" class="text-start" onsubmit="${onsubmit}">
+         <input type="hidden" id="id" value="${promo?promo.id:''}" name="id" class="form-control" required>
+
     <div class="mb-3">
       <label for="titulo" class="form-label">Título</label>
-      <input type="text" id="titulo" name="titulo" class="form-control" maxlength="100" required>
+      <input type="text" id="titulo" value="${promo?promo.titulo:''}" name="titulo" class="form-control" maxlength="100" required>
     </div>
 
     <div class="mb-3">
       <label for="descripcion" class="form-label">Descripción</label>
-      <textarea id="descripcion" name="descripcion" class="form-control" rows="3"></textarea>
+      <textarea id="descripcion" name="descripcion" class="form-control" rows="5">${promo?promo.descripcion:''}</textarea>
     </div>
 
   <div class="row">
   <div class="col-md-6 mb-3">
     <label for="costo" class="form-label">Costo</label>
-    <input type="number" id="costo" name="costo" class="form-control" min="0" required>
+    <input type="number" id="costo" value="${promo?promo.costo:''}" name="costo" class="form-control" min="0" required>
   </div>
 <div class="col-md-6 mb-3">
     <label for="tipo" class="form-label">Dias de Vigencia</label>
-        <input type="number" id="vigencia" name="vigencia" class="form-control" min="0" required>
+        <input type="number" id="vigencia" value="${promo?promo.dias_vigencia:''}" name="vigencia" class="form-control" min="0" required>
 
   </div>
   <div class="col-md-12 mb-3">
     <label for="tipo" class="form-label">Tipo de promoción</label>
     <select id="tipo" name="tipo" class="form-select" onchange="toggleCategoriaField()">
-      <option value="general">General (todos los usuarios)</option>
-      <option value="nuevo_usuario">Solo nuevos usuarios</option>
-      <option value="categoria">Por categoría de servicio</option>
-      <option value="publicacion">Por cada Publicacion</option>
-      <option value="dias">Por dias de Vigencia</option>
-      <option value="golden">Plan Golden</option>
+      <option value="general" ${promo?promo.tipo=='general'?'selected':'':''}>General (todos los usuarios)</option>
+      <option value="nuevo_usuario" ${promo?promo.tipo=='nuevo_usuario'?'selected':'':''}>Solo nuevos usuarios</option>
+      <option value="categoria" ${promo?promo.tipo=='categoria'?'selected':'':''}>Por categoría de servicio</option>
+      <option value="publicacion" ${promo?promo.tipo=='publicacion'?'selected':'':''}>Por cada Publicacion</option>
+      <option value="dias" ${promo?promo.tipo=='dias'?'selected':'':''}>Por dias de Vigencia</option>
+      <option value="golden" ${promo?promo.tipo=='golden'?'selected':'':''}>Plan Golden</option>
 
     </select>
   </div>
@@ -1921,6 +1946,18 @@ function convertirAMPM(fechaStr) {
   </form>
         `;
                 modal.show();
+                if (promo) {
+                    const formPromocion = document.getElementById("formPromocion");
+                    const tipo = formPromocion.querySelector("#tipo");
+                    const categoria = formPromocion.querySelector("#categoria");
+
+                    if (promo.tipo == "categoria") {
+                        tipo.dispatchEvent(new Event("change"));
+                        setTimeout(() => {
+                            categoria.value = promo.categoria;
+                        }, 2000);
+                    }
+                }
             }
             async function cargarCategorias() {
                 try {
@@ -1963,7 +2000,6 @@ function convertirAMPM(fechaStr) {
                         inputTitulo.value = "PLAN PUBLICACION";
                         inputTitulo.readOnly = true;
                     } else {
-                        inputTitulo.value = "";
                         inputTitulo.readOnly = false;
                     }
 

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:prestaservicios/compartido/colores.dart';
 import 'package:prestaservicios/funcionalidades/autenticacion/ui/paginas/inicio.dart';
-import 'package:prestaservicios/funcionalidades/autenticacion/ui/paginas/login.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey =
-      'pk_live_51Q7s4F2LsYRcAOwZ3hJmAOQMBqZkTd7Z1GykD8L06EqByvqnT8WmculzMYV36rbKTALHkRdaF3Ar6DaiWqOpLvz300VRBuKltY';
-  await Stripe.instance.applySettings();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  //await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -24,7 +20,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xFF00BFA6),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+        scaffoldBackgroundColor:  Colores.color_secundario,
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white, // fondo del input
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
           ), // label text
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Color(0xFF8E24AA), width: 2),
+            borderSide: BorderSide(color: Color(0xFF00BFA6), width: 2),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -70,10 +71,10 @@ class MyApp extends StatelessWidget {
             foregroundColor: const Color(0xFF00BFA6), // color del texto
           ),
         ),
-        primaryColor: Colors.purple,
-        appBarTheme: const AppBarTheme(
+        primaryColor: const Color(0xFF00BFA6),
+        appBarTheme:  AppBarTheme(
           centerTitle: true,
-          color: Colors.purple,
+          color: Colores.color_primario,
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 20, // 👈 cambia el tamaño aquí
@@ -91,7 +92,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: Inicio()
+      home: Inicio(),
     );
   }
 }

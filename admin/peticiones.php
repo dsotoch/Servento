@@ -102,6 +102,7 @@ if ($action) {
             if (!$row) jsonError('Pago no encontrado');
 
             $pdo->prepare("DELETE FROM pagos WHERE id=?")->execute([$id]);
+            $pdo->prepare("DELETE FROM asignaciones_pagos WHERE pago_id=?")->execute([$id]);
             jsonOk('Pago Eliminado Correctamente');
         }
 
@@ -163,27 +164,25 @@ if ($action) {
 
                 move_uploaded_file($nombreTmp, $rutaDestino);
             }
-            if($id == "todos"){
+            if ($id == "todos") {
                 $stmtUsuarios = $pdo->query("SELECT id FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
-                foreach($stmtUsuarios as $usuario){
+                foreach ($stmtUsuarios as $usuario) {
                     $stmtPago = $pdo->prepare(
                         "INSERT INTO servicios_mensajes (mensaje, usuario_id, servicio,imagen,vigencia) VALUES (?, ?, ?,?,?)"
                     );
-    
+
                     $stmtPago->execute([$mensaje, $usuario['id'], $servicio, $nombreArchivo, $vigencia]);
                 }
                 jsonOk("Mensaje enviado a todos los usuarios correctamente");
-            }else{
-  $stmtPago = $pdo->prepare(
-                "INSERT INTO servicios_mensajes (mensaje, usuario_id, servicio,imagen,vigencia) VALUES (?, ?, ?,?,?)"
-            );
+            } else {
+                $stmtPago = $pdo->prepare(
+                    "INSERT INTO servicios_mensajes (mensaje, usuario_id, servicio,imagen,vigencia) VALUES (?, ?, ?,?,?)"
+                );
 
-            $stmtPago->execute([$mensaje, $id, $servicio, $nombreArchivo, $vigencia]);
+                $stmtPago->execute([$mensaje, $id, $servicio, $nombreArchivo, $vigencia]);
 
-            jsonOk("Mensaje enviado correctamente");
+                jsonOk("Mensaje enviado correctamente");
             }
-
-          
         }
 
 
@@ -269,6 +268,7 @@ if ($action) {
 
             $sql = "
 SELECT u.*,
+u.id as ID,
 ap.dias AS dias,
        ap.id AS asignacion_id,
        ap.descripcion_plan,
@@ -284,7 +284,7 @@ LEFT JOIN asignaciones_pagos AS ap
       ORDER BY  ap2.id DESC
       LIMIT 1
   )
-WHERE 1=1
+WHERE 1=1 AND (u.admin !='si' OR u.admin IS NULL)
     ";
 
             $params = [];
@@ -327,6 +327,8 @@ WHERE 1=1
                     $new = 'inactivo';
                     break;
                 case 'PENDIENTE':
+                case 'pendiente':
+                case 'verificado':
                     $new = 'activo';
                     break;
                 case 'INACTIVO':
@@ -451,12 +453,19 @@ WHERE 1=1
         }
         if ($action === 'listarcate') {
             $id = intval($_GET['id'] ?? 0);
+            $tipo = $_GET["tipo"] ?? "";
             if ($id <= 0) jsonError('ID inválido');
+            if ($tipo == "subcate") {
+                $stmt = $pdo->query("SELECT * FROM subcategorias WHERE id = $id")->fetch(PDO::FETCH_ASSOC);
+                if (!$stmt) jsonError('SubCategoría no encontrada');
+            } else {
+                $stmt = $pdo->query("SELECT * FROM categorias WHERE id = $id")->fetch(PDO::FETCH_ASSOC);
+                if (!$stmt) jsonError('Categoría no encontrada');
+            }
 
-            $stmt = $pdo->query("SELECT * FROM categorias WHERE id = $id")->fetch(PDO::FETCH_ASSOC);
-            if (!$stmt) jsonError('Categoría no encontrada');
             jsonOk($stmt);
         }
+
 
         if ($action === 'eliminarcategoria') {
             $id = intval($_POST['id'] ?? 0);
@@ -597,6 +606,7 @@ WHERE 1=1
             if ($row["estado"] == "ACTIVO") {
                 $new = "INACTIVO";
             }
+
             $pdo->prepare("UPDATE usuarios SET estado=? WHERE id=?")->execute([$new, $id]);
             jsonOk('OK');
         }
@@ -880,8 +890,8 @@ WHERE 1=1
                 jsonOk(['id' => $pdo->lastInsertId()]);
             } else {
                 if ($id <= 0) jsonError('ID inválido');
-                $stmt = $pdo->prepare("UPDATE promociones SET titulo=?,descripcion=?,descuento=?,fecha_inicio=?,fecha_fin=?,estado=?,dias_vigencia=? WHERE id=?");
-                $stmt->execute([$cliente, $titulo, $desc, $descuento, $fi, $ff, $estado, $id, $vigencia]);
+                $stmt = $pdo->prepare("UPDATE promociones SET titulo=?,descripcion=?,costo=?,tipo=?,categoria=?,estado=?,dias_vigencia=? WHERE id=?");
+                $stmt->execute([strtoupper($titulo), $desc, $costo, $tipo, $categoria, $estado, $vigencia,$id]);
                 jsonOk('OK');
             }
         }

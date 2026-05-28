@@ -88,7 +88,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Clientes"), backgroundColor: Colors.purple),
+      appBar: AppBar(title: Text("Clientes")),
       body: clientes.isEmpty
           ? Center(child: Text("No se Encontraron Chats."))
           : ListView.separated(
@@ -103,7 +103,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(
-                      '${Env.dominio}${cliente.fotoUrl}',
+                      '${Env.dominio}/${cliente.fotoUrl}',
                     ),
                   ),
                   title: Text(cliente.nombre),
@@ -257,17 +257,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 radius: 20,
                 backgroundColor: Colors.grey.shade300,
                 backgroundImage: (widget.cliente.fotoUrl.isNotEmpty)
-                    ? NetworkImage('${Env.dominio}${widget.cliente.fotoUrl}')
+                    ? NetworkImage('${Env.dominio}/${widget.cliente.fotoUrl}')
                     : null,
                 child: (widget.cliente.fotoUrl.isEmpty)
                     ? Icon(Icons.person, color: Colors.white, size: 20)
                     : null,
               ),
               SizedBox(width: 10),
-              Text(widget.cliente.nombre),
+              Text(widget.cliente.nombre,softWrap: true,style: TextStyle(fontSize: 13),),
             ],
           ),
-          backgroundColor: Colors.purple,
         ),
         body: Column(
           children: [

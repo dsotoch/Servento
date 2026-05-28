@@ -17,4 +17,9 @@ abstract class casoUsoAuth {
   Future<Map<String, dynamic>> enviarCodigo(String usuario);
   Future<Map<String, dynamic>> validarCodigo(String telefono, String codigo);
   Future<Map<String, dynamic>> reenviarCodigo(String usuario);
+  Future<Map<String, dynamic>> validarEmailAndTelefono(
+    String email,
+    String telefono,
+  );
+  Future<Map<String, dynamic>> resetPass(String email);
 }

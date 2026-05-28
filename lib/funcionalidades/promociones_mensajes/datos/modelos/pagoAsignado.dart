@@ -10,6 +10,7 @@ class PagoAsignado {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String codigostripe;
+  final String diasVigencia;
 
   PagoAsignado({
     required this.id,
@@ -23,6 +24,7 @@ class PagoAsignado {
     required this.createdAt,
     required this.updatedAt,
     required this.codigostripe,
+    required this.diasVigencia
   });
 
   factory PagoAsignado.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class PagoAsignado {
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       codigostripe: json['codigostripe'] ?? "",
+      diasVigencia: json['dias'] ?? "",
     );
   }
 

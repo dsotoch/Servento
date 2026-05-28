@@ -1,7 +1,7 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'stripe_auth.php'; // carga STRIPE_SECRET_KEY o STRIPE_SECRET_KEY_TEST
+require_once 'flow_auth.php';
 
 date_default_timezone_set("America/Lima");
 
@@ -90,7 +90,7 @@ function validarCupon($cupon, $paymentid)
         return ["success" => false, "mensaje" => $e->getMessage()];
     }
 }
-function validarCodigo($cupon)
+function validarCodigo($cupon, $usuario_id)
 {
     try {
         global $pdo;
@@ -117,6 +117,9 @@ function validarCodigo($cupon)
                 return ["success" => false, "mensaje" => "Codigo expirado."];
             }
         }
+        $hoy = date("Y-m-d H:i:s");
+        $insert_usuario_cupon = "INSERT INTO usuario_cupon(usuario_id,cupon_id,fecha) VALUES(?,?,?)";
+        $pdo->prepare($insert_usuario_cupon)->execute([$usuario_id, $cuponData['id'], $hoy]);
 
         return [
             "success" => true,

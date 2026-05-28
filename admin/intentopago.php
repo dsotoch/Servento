@@ -21,11 +21,11 @@ $nombre = $row["titulo"] ?? "";
 $dias = $row["dias_vigencia"] ?? "";
 
 try {
-    require 'vendor/autoload.php';
-    require_once('stripe_auth.php');
+    require_once 'vendor/autoload.php';
+    require_once('flow_auth.php');
 
-    $montoStripe = floatval($_POST['monto']) * 100;
-    $moneda = $MONEDA ?? 'mxn';
+    $montoStripe = floatval($_POST['monto']);
+    $moneda = $MONEDA ?? 'PEN';
     $descripcion = $nombre ?? 'Plan asignado';
     $usuario_id = $_POST['usuario_id'];
     $tienePagoPendiente = $pdo->prepare("
@@ -39,15 +39,14 @@ try {
         exit;
     }
 
-    // Crear PaymentIntent
-    $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => $montoStripe,
-        'currency' => $moneda,
-        'description' => $descripcion,
-        'automatic_payment_methods' => [
-            'enabled' => true,
-        ],
-    ]);
+    $email_consulta = $pdo->prepare("
+    SELECT email FROM usuarios WHERE id = :usuario_id  LIMIT 1
+");
+    $email_consulta->execute([':usuario_id' => $usuario_id]);
+    $email_cliente = $email_consulta->fetch(PDO::FETCH_ASSOC);
+    $email = $email_cliente["email"];
+
+    $paymentIntent = crearOrdenPago($montoStripe, $email);
 
     // Guardar en tabla pagos
     $stmt = $pdo->prepare("
@@ -56,7 +55,7 @@ try {
     ");
     $stmt->execute([
         $usuario_id,
-        $paymentIntent->id,
+        $paymentIntent->flowOrder,
         $_POST['monto'],
         $moneda,
         $descripcion,
@@ -65,6 +64,7 @@ try {
     ]);
 
     $ultimoPagoId = $pdo->lastInsertId();
+    $urlpago=$paymentIntent->url."?token=".$paymentIntent->token;
 
     // Asignar la promoción al usuario
     $stmt2 = $pdo->prepare("
@@ -77,16 +77,14 @@ try {
         $_POST['monto'],
         $_POST['fecha_asignada'] ?? date('Y-m-d'),
         $ultimoPagoId,
-        $paymentIntent->client_secret,
+        $urlpago,
         $dias
     ]);
 
     jsonOk([
         'mensaje' => 'Pago y asignación creados correctamente',
-        'client_secret' => $paymentIntent->client_secret
+        'client_secret' => $urlpago
     ]);
-} catch (\Stripe\Exception\ApiErrorException $e) {
-    jsonError("Error en Stripe: " . $e->getMessage());
 } catch (\PDOException $e) {
     jsonError("Error en la base de datos: " . $e->getMessage());
 } catch (\Exception $e) {

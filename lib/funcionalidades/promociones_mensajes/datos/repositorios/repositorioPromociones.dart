@@ -3,9 +3,9 @@ import 'package:prestaservicios/funcionalidades/promociones_mensajes/dominio/cas
 
 class RepositorioPromociones implements casoUsoPromociones {
   @override
-  Future<Map<String, dynamic>> getpromociones() async {
+  Future<Map<String, dynamic>> getpromociones(String usuario_id) async {
     try {
-      final response = await ApiService().GET("apirest.php/promociones");
+      final response = await ApiService().GET("apirest.php/promociones",{'usuario_id':usuario_id});
       return response;
     } catch (e) {
       // Captura errores generales
@@ -142,10 +142,11 @@ class RepositorioPromociones implements casoUsoPromociones {
   }
 
   @override
-  Future<Map<String, dynamic>> validarCodigo(String codigo) async {
+  Future<Map<String, dynamic>> validarCodigo(String codigo,String usuario_id) async {
     try {
       final response = await ApiService().GET("apirest.php/cupones", {
         'codigo': codigo,
+        'usuario_id':usuario_id
       });
       return response;
     } catch (e) {

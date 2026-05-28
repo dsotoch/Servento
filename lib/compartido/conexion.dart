@@ -1,17 +1,23 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:prestaservicios/nucleo/env.dart';
 
 class ApiService {
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'https://cucalacurra.servirentamx.com/',
-    connectTimeout: const Duration(seconds: 60),
-    receiveTimeout: const Duration(seconds: 120),
-    contentType: Headers.jsonContentType,
-  ));
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: Env.dominio + "/",
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 120),
+      contentType: Headers.jsonContentType,
+    ),
+  );
 
   /// 🔹 Método GET
-  Future<Map<String, dynamic>> GET(String url, [Map<String, dynamic>? params]) async {
+  Future<Map<String, dynamic>> GET(
+    String url, [
+    Map<String, dynamic>? params,
+  ]) async {
     try {
       final response = await _dio.get(url, queryParameters: params);
 
@@ -36,10 +42,11 @@ class ApiService {
   }
 
   /// 🔹 Método PUT
-  Future<Map<String, dynamic>> PUT(String url, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> PUT(
+    String url,
+    Map<String, dynamic> data,
+  ) async {
     try {
-
-
       final response = await _dio.put(
         url,
         data: data,
@@ -57,7 +64,7 @@ class ApiService {
         return {
           'success': false,
           'mensaje': 'Respuesta inesperada del servidor',
-          'raw': response.data
+          'raw': response.data,
         };
       }
     } on DioException catch (e) {
@@ -65,22 +72,18 @@ class ApiService {
         'success': false,
         'mensaje': e.message,
         'statusCode': e.response?.statusCode,
-        'raw': e.response?.data
+        'raw': e.response?.data,
       };
     } catch (e) {
-
-
-      return {
-        'success': false,
-        'mensaje': e.toString()
-      };
+      return {'success': false, 'mensaje': e.toString()};
     }
   }
 
-
-
   /// 🔹 Método DELETE
-  Future<Map<String, dynamic>> DELETE(String url, [Map<String, dynamic>? params]) async {
+  Future<Map<String, dynamic>> DELETE(
+    String url, [
+    Map<String, dynamic>? params,
+  ]) async {
     try {
       final response = await _dio.delete(url, queryParameters: params);
       return Map<String, dynamic>.from(response.data);
@@ -98,16 +101,13 @@ class ApiService {
       return {
         'success': false,
         'mensaje': e.response?.data['mensaje'] ?? 'Error del servidor',
-        'status': e.response?.statusCode
+        'status': e.response?.statusCode,
       };
     } else {
       return {
         'success': false,
-        'mensaje': 'Sin conexión con el servidor o timeout'
+        'mensaje': 'Sin conexión con el servidor o timeout',
       };
     }
   }
-
-
-
 }

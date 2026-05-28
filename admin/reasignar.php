@@ -11,7 +11,7 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 $MONEDA = $row["moneda"] ?? "";
 try {
     require 'vendor/autoload.php';
-    require_once('stripe_auth.php');
+    require_once('flow_auth.php');
 
     $montoStripe = floatval($_POST['monto']) * 100;
     $moneda = $MONEDA ?? 'mxn';

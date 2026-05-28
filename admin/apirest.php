@@ -35,6 +35,35 @@ if ($resource == "categorias") {
         respond($loguearse);
     }
 }
+
+if ($resource == "activarCuenta") {
+    if ($method === 'GET') {
+        require_once("usuario.php");
+        $token = $_GET["token"] ?? "";
+        $enviarActivacion = activarCuenta($token);
+        respond($enviarActivacion);
+    }
+}
+if ($resource == "send_email") {
+    if ($method === 'POST') {
+
+        $in = getJsonInput();
+        $email = trim($in['email'] ?? '');
+
+        require_once("usuario.php");
+        $enviarActivacion = enviarActivacion($email);
+        respond($enviarActivacion);
+    }
+    if ($method === 'GET') {
+
+
+        $email = trim($_GET['email'] ?? '');
+
+        require_once("usuario.php");
+        $enviarActivacion = enviarReset($email);
+        respond($enviarActivacion);
+    }
+}
 if ($resource == "chat") {
     if ($method === 'GET') {
         require_once("chats.php");
@@ -99,11 +128,15 @@ if ($resource == "usuario") {
         $telefono = trim($in['telefono'] ?? '');
 
         require_once("usuario.php");
-        $registrar = registrarUsuario($user, $pass, $email,$telefono);
+        $registrar = registrarUsuario($user, $pass, $email, $telefono);
         respond($registrar);
     }
     if ($method == "GET") {
-        respond(["data" => "probadnao"]);
+        $telefono = $_GET["telefono"] ?? '';
+        $email = $_GET["email"] ?? '';
+        require_once("usuario.php");
+        $validar = validarTelefonoAndEmail($telefono, $email);
+        respond($validar);
     }
     if ($method === 'PUT') {
         try {
@@ -158,6 +191,7 @@ if ($resource == "servicios") {
         $precio = floatval($in['precio'] ?? 0);
         $ubicacion = trim($in['ubicacion'] ?? '');
         $categoria = trim($in['categoria'] ?? '');
+        $sub = trim($in['subcategoria'] ?? '');
         $usuario_id = intval($in['usuario_id'] ?? 0);
         $id = intval($in['id'] ?? 0);
         $estado = $in['estado'] ?? 'activo';
@@ -184,7 +218,8 @@ if ($resource == "servicios") {
             $estado,
             $lat,
             $long,
-            $nuevasImagenes
+            $nuevasImagenes,
+            $sub
         );
 
         respond($resultado);
@@ -288,9 +323,10 @@ if ($resource == "cupones") {
     }
     if ($method == "GET") {
         $cupon = $_GET["codigo"] ?? 0;
+        $usuario_id = $_GET["usuario_id"] ?? 0;
         require_once("cuponeslogica.php");
 
-        $inser = validarCodigo($cupon);
+        $inser = validarCodigo($cupon, $usuario_id);
 
         respond($inser);
     }
@@ -324,6 +360,7 @@ if ($resource == "promociones") {
         $id = $_GET["id"] ?? 0;
         $cantidad = $_GET["cantidad"] ?? 0;
         $viene = $_GET["viene"] ?? "";
+        $usuario_id = $_GET["usuario_id"] ?? 0;
 
         require_once("comentarios.php");
         $inser = "";
@@ -345,7 +382,7 @@ if ($resource == "promociones") {
                 $inser = paymentSecret($id);
                 break;
             default:
-                $inser = listarComentarios();
+                $inser = listarComentarios($usuario_id);
                 break;
         }
 

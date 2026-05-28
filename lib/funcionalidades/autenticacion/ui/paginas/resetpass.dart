@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:prestaservicios/funcionalidades/autenticacion/datos/repositorios/repositorioAuth.dart';
+import 'package:prestaservicios/funcionalidades/autenticacion/dominio/casosUso/casoUsoAuth.dart';
+import 'package:prestaservicios/funcionalidades/autenticacion/ui/controladores/controladorAuth.dart';
 
 class PantallaRecuperarContrasena extends StatefulWidget {
   const PantallaRecuperarContrasena({super.key});
@@ -13,6 +16,13 @@ class _PantallaRecuperarContrasenaState
     extends State<PantallaRecuperarContrasena> {
   final TextEditingController emailController = TextEditingController();
   bool cargando = false;
+  late ControladorAuth controladorAuth;
+  @override
+  void initState() {
+    super.initState();
+    final casoUsoAuth = RepositorioAuth();
+    controladorAuth = ControladorAuth(usoAuth: casoUsoAuth);
+  }
 
   Future<void> _restablecerContrasena() async {
     final email = emailController.text.trim();
@@ -30,12 +40,13 @@ class _PantallaRecuperarContrasenaState
     setState(() => cargando = true);
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await controladorAuth.resetPass(email);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              '✅ Se ha enviado un correo para restablecer tu contraseña. Revisa tu bandeja de entrada.'),
+            '✅ Se ha enviado un correo para restablecer tu contraseña. Revisa tu bandeja de entrada.',
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -62,8 +73,10 @@ class _PantallaRecuperarContrasenaState
         prefixIcon: const Icon(Icons.email, color: Color(0xFF00BFA6)),
         filled: true,
         fillColor: const Color(0xFFF1FDFB),
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 15,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
@@ -100,15 +113,19 @@ class _PantallaRecuperarContrasenaState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.lock_reset_outlined,
-                    size: 70, color: Color(0xFF00BFA6)),
+                const Icon(
+                  Icons.lock_reset_outlined,
+                  size: 70,
+                  color: Color(0xFF00BFA6),
+                ),
                 const SizedBox(height: 20),
                 const Text(
                   'Restablece tu contraseña',
                   style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF00695C)),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00695C),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
@@ -126,14 +143,14 @@ class _PantallaRecuperarContrasenaState
                       ),
                     ),
                     child: cargando
-                        ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                      'Enviar correo de recuperación',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                            'Enviar correo de recuperación',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
