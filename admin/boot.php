@@ -69,7 +69,7 @@ function verificarTodosLosPagos()
         ap.fecha_asignada,
         ap.dias,
         uc.fecha,
-        c.vigencia_fin
+        c.fecha_fin
 
     FROM usuarios u
 
@@ -95,7 +95,7 @@ function verificarTodosLosPagos()
     ) uc 
         ON u.id = uc.usuario_id
 
-    LEFT JOIN cupones c 
+    LEFT JOIN codigos_publicacion c 
         ON uc.cupon_id = c.id";
 
     $stmt = $pdo->prepare($sql);
@@ -151,10 +151,10 @@ function verificarPagoIndividual(array $data)
     }
 
     // ===== CUPÓN =====
-    if (!empty($data["vigencia_fin"])) {
+    if (!empty($data["fecha_fin"])) {
 
         $fechas_vigencia[] = strtotime(
-            $data["vigencia_fin"]
+            $data["fecha_fin"]
         );
     }
 
